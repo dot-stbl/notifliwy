@@ -9,6 +9,7 @@ using Notifliwy.Diagnostic.Additions;
 using Notifliwy.Handlers.Interfaces;
 using Notifliwy.Extensions;
 using Microsoft.Extensions.DependencyInjection;
+using Notifliwy.Options;
 
 namespace Notifliwy.Connectors;
 
@@ -17,11 +18,10 @@ namespace Notifliwy.Connectors;
 /// </summary>
 public class NotificationConnectorService<TEvent>(
     IInputPipe<TEvent> inputPipe,
-    IServiceScopeFactory scopeFactory) : BackgroundService
+    IServiceScopeFactory scopeFactory,
+    NotificationConnectorOptions<TEvent> connectorOptions) : BackgroundService
         where TEvent : IEvent
 {
-    private const int WorkerCount = 8;
-    
     /// <inheritdoc />
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
@@ -31,8 +31,8 @@ public class NotificationConnectorService<TEvent>(
             .ExecutorsBy<TEvent>()
             .ToArray();
         
-        var tasks = Enumerable.Range(0, WorkerCount)
-            .Select(_ => Task.Run(function: async () 
+        var tasks = Enumerable.Range(0, connectorOptions.WorkerCount)
+            .Select(_ => Task.Run(function: async ()
                 => await RunPipeRouter(
                     executors, 
                     cancellationToken), 
