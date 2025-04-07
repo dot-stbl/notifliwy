@@ -36,4 +36,4 @@ workflows easy to configure.
 
 ## Project
 
-This project comes with an [Apache license](LICENSE). Contact the `.stbl` group.
+This project comes with an [GNU3.0](LICENSE). Contact the `.stbl` group.
