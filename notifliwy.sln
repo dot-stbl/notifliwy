@@ -1,0 +1,74 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{6E5DC1C3-7D78-4096-A503-5A8A95A1CD2F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{5D822A45-8E91-4B7F-A936-C6ADD9140835}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "client", "client", "{A28DD607-A78F-4866-8C3B-3D66B678B2F2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "libraries", "libraries", "{2B33D05E-0FB9-45B3-92A4-73ED9D535C65}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Notifliwy", "src\libraries\Notifliwy\Notifliwy.csproj", "{840DDA4F-612C-40F3-ADD8-1024389D947F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Notifliwy.Units", "test\Notifliwy.Units\Notifliwy.Units.csproj", "{0FD55EF9-7C77-4078-AFAF-D00C9B5FCC46}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Notifliwy.Benchmark", "test\Notifliwy.Benchmark\Notifliwy.Benchmark.csproj", "{BADBAF09-E04E-4099-9532-4608551B94EF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "repo", "repo", "{56DEB02C-E90E-421C-BB46-21C96DC4D898}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+		LICENSE = LICENSE
+		.gitignore = .gitignore
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "diagnostic", "diagnostic", "{369CCF68-18C7-46E8-8D7D-52C22EF631DD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "deploy", "deploy", "{A150F95F-2BC3-4BAC-BAF5-448D1199E606}"
+	ProjectSection(SolutionItems) = preProject
+		deploy\docker-compose.yml = deploy\docker-compose.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{DAFC6AAB-4A48-4CDC-A0B9-57ECFB1F5FF8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Notifliwy.Application.Demonstration", "samples\Notifliwy.Application.Demonstration\Notifliwy.Application.Demonstration.csproj", "{AE853E82-54F8-4F3F-B65D-CC43945A2D4C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Notifliwy.OpenTelemetry.Instrumentation", "src\diagnostic\Notifliwy.OpenTelemetry.Instrumentation\Notifliwy.OpenTelemetry.Instrumentation.csproj", "{1E11C6D4-09C1-4735-B4F1-77A27E665BE3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A28DD607-A78F-4866-8C3B-3D66B678B2F2} = {6E5DC1C3-7D78-4096-A503-5A8A95A1CD2F}
+		{2B33D05E-0FB9-45B3-92A4-73ED9D535C65} = {6E5DC1C3-7D78-4096-A503-5A8A95A1CD2F}
+		{840DDA4F-612C-40F3-ADD8-1024389D947F} = {2B33D05E-0FB9-45B3-92A4-73ED9D535C65}
+		{0FD55EF9-7C77-4078-AFAF-D00C9B5FCC46} = {5D822A45-8E91-4B7F-A936-C6ADD9140835}
+		{BADBAF09-E04E-4099-9532-4608551B94EF} = {5D822A45-8E91-4B7F-A936-C6ADD9140835}
+		{369CCF68-18C7-46E8-8D7D-52C22EF631DD} = {6E5DC1C3-7D78-4096-A503-5A8A95A1CD2F}
+		{AE853E82-54F8-4F3F-B65D-CC43945A2D4C} = {DAFC6AAB-4A48-4CDC-A0B9-57ECFB1F5FF8}
+		{1E11C6D4-09C1-4735-B4F1-77A27E665BE3} = {369CCF68-18C7-46E8-8D7D-52C22EF631DD}
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{840DDA4F-612C-40F3-ADD8-1024389D947F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{840DDA4F-612C-40F3-ADD8-1024389D947F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{840DDA4F-612C-40F3-ADD8-1024389D947F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{840DDA4F-612C-40F3-ADD8-1024389D947F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0FD55EF9-7C77-4078-AFAF-D00C9B5FCC46}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0FD55EF9-7C77-4078-AFAF-D00C9B5FCC46}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0FD55EF9-7C77-4078-AFAF-D00C9B5FCC46}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0FD55EF9-7C77-4078-AFAF-D00C9B5FCC46}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BADBAF09-E04E-4099-9532-4608551B94EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BADBAF09-E04E-4099-9532-4608551B94EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BADBAF09-E04E-4099-9532-4608551B94EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BADBAF09-E04E-4099-9532-4608551B94EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE853E82-54F8-4F3F-B65D-CC43945A2D4C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE853E82-54F8-4F3F-B65D-CC43945A2D4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE853E82-54F8-4F3F-B65D-CC43945A2D4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE853E82-54F8-4F3F-B65D-CC43945A2D4C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E11C6D4-09C1-4735-B4F1-77A27E665BE3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E11C6D4-09C1-4735-B4F1-77A27E665BE3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E11C6D4-09C1-4735-B4F1-77A27E665BE3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E11C6D4-09C1-4735-B4F1-77A27E665BE3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

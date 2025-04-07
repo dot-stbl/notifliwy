@@ -1,0 +1,72 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+    <PropertyGroup>
+        <Nullable>enable</Nullable>
+        <LangVersion>latest</LangVersion>
+        <TargetFramework>net8.0</TargetFramework>
+        <OutputType>Library</OutputType>
+        <IsPackable>true</IsPackable>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="Notifliwy.Units" /> 
+        <InternalsVisibleTo Include="Notifliwy.Benchmark" /> 
+    </ItemGroup>
+    
+    <ItemGroup>
+        <InternalsVisibleTo Include="Notifliwy.Hosting" />
+        <InternalsVisibleTo Include="Notifliwy.OpenTelemetry.Instrumentation" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions" Version="2.3.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="..\..\..\contents\icon.main.png">
+        <Pack>True</Pack>
+        <PackagePath/>
+        <Link>icon.main.png</Link>
+      </None>
+    </ItemGroup>
+
+    <PropertyGroup>
+        <Version>1.0.0-alpha-01</Version>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <Authors>stbl</Authors>
+        <RepositoryType>git</RepositoryType>
+        <PackageIcon>icon.main.png</PackageIcon>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <RepositoryUrl>https://github.com/dot-stbl/notifliwy.git</RepositoryUrl>
+        <Description>OpenTelemetry instrument providers for Notifliwy</Description>
+        <PackageTags>notifliwy, notification, event, handler, connector, condition</PackageTags>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <Copyright>Copyright (c) stbl 2025.</Copyright>
+        <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <Content Include="..\..\..\README.md">
+            <Link>README.md</Link>
+            <Pack>True</Pack>
+            <PackagePath/>
+        </Content>
+    </ItemGroup>
+    
+    <PropertyGroup>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+    </PropertyGroup>
+    
+</Project>
