@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading;
@@ -10,7 +9,6 @@ using Notifliwy.Conditions.Interfaces;
 using Notifliwy.Contexts.Interfaces;
 using Notifliwy.Exporters.Interfaces;
 using Notifliwy.Extensions;
-using Notifliwy.Handlers.Interfaces;
 using Notifliwy.Mapper.Interfaces;
 using Notifliwy.Models.Interfaces;
 using Notifliwy.Options;
@@ -142,14 +140,4 @@ public class SectorRuntimeCompiler<TNotification, TEvent>(
 
         return (notification, _) => ValueTask.FromResult(notification);
     }
-}
-
-internal class HandlerVerifierOptions<TNotification, TEvent>
-    where TNotification : INotification
-    where TEvent : IEvent
-{
-    /// <summary>
-    /// Collection assigned <see cref="IVerifierExecution"/>
-    /// </summary>
-    public IReadOnlyCollection<Type> VerifiersExecution { get; } = [];
 }

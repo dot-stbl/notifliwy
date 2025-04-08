@@ -4,8 +4,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{6E5DC1C3-7D7
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{5D822A45-8E91-4B7F-A936-C6ADD9140835}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "client", "client", "{A28DD607-A78F-4866-8C3B-3D66B678B2F2}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "libraries", "libraries", "{2B33D05E-0FB9-45B3-92A4-73ED9D535C65}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Notifliwy", "src\libraries\Notifliwy\Notifliwy.csproj", "{840DDA4F-612C-40F3-ADD8-1024389D947F}"
@@ -19,6 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "repo", "repo", "{56DEB02C-E
 		README.md = README.md
 		LICENSE = LICENSE
 		.gitignore = .gitignore
+		directory.build.props = directory.build.props
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "diagnostic", "diagnostic", "{369CCF68-18C7-46E8-8D7D-52C22EF631DD}"
@@ -26,13 +25,28 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "deploy", "deploy", "{A150F95F-2BC3-4BAC-BAF5-448D1199E606}"
 	ProjectSection(SolutionItems) = preProject
 		deploy\docker-compose.yml = deploy\docker-compose.yml
+		deploy\kafka-compose.yml = deploy\kafka-compose.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{DAFC6AAB-4A48-4CDC-A0B9-57ECFB1F5FF8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Notifliwy.Application.Demonstration", "samples\Notifliwy.Application.Demonstration\Notifliwy.Application.Demonstration.csproj", "{AE853E82-54F8-4F3F-B65D-CC43945A2D4C}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Notifliwy.OpenTelemetry.Instrumentation", "src\diagnostic\Notifliwy.OpenTelemetry.Instrumentation\Notifliwy.OpenTelemetry.Instrumentation.csproj", "{1E11C6D4-09C1-4735-B4F1-77A27E665BE3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "providers", "providers", "{B27206FE-1333-48A5-B0A4-38C01AFC51D1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Notifliwy.Provider.MassTransit.Kafka", "src\providers\Notifliwy.Provider.MassTransit.Kafka\Notifliwy.Provider.MassTransit.Kafka.csproj", "{51926345-C1FD-4F6B-A6E6-5AE8FD9F6C43}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "kafka", "kafka", "{8E581EB3-8B6F-422E-861E-AB8727FC7695}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Notifliwy.Sample.Kafka.Sender", "samples\kafka\Notifliwy.Sample.Kafka.Sender\Notifliwy.Sample.Kafka.Sender.csproj", "{B7D57996-E78C-42CE-B117-0B1FC3BADE57}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Notifliwy.Sample.Kafka.Server", "samples\kafka\Notifliwy.Sample.Kafka.Server\Notifliwy.Sample.Kafka.Server.csproj", "{E1784EBF-C0F5-4383-8A6C-C5CBA4FC197D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Notifliwy.Sample.Kafka", "samples\kafka\Notifliwy.Sample.Kafka\Notifliwy.Sample.Kafka.csproj", "{80035779-54D6-41A1-AD0F-CC329149061A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "extensions", "extensions", "{533E2BC0-136F-4562-97C5-E0AB28DF9339}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synaptix.MassTransit.Kafka.Protobuf", "src\extensions\Synaptix.MassTransit.Kafka.Protobuf\Synaptix.MassTransit.Kafka.Protobuf.csproj", "{22EE1FEE-B95F-4DD7-89B1-D1D130AA14A8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -40,14 +54,20 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{A28DD607-A78F-4866-8C3B-3D66B678B2F2} = {6E5DC1C3-7D78-4096-A503-5A8A95A1CD2F}
 		{2B33D05E-0FB9-45B3-92A4-73ED9D535C65} = {6E5DC1C3-7D78-4096-A503-5A8A95A1CD2F}
 		{840DDA4F-612C-40F3-ADD8-1024389D947F} = {2B33D05E-0FB9-45B3-92A4-73ED9D535C65}
 		{0FD55EF9-7C77-4078-AFAF-D00C9B5FCC46} = {5D822A45-8E91-4B7F-A936-C6ADD9140835}
 		{BADBAF09-E04E-4099-9532-4608551B94EF} = {5D822A45-8E91-4B7F-A936-C6ADD9140835}
 		{369CCF68-18C7-46E8-8D7D-52C22EF631DD} = {6E5DC1C3-7D78-4096-A503-5A8A95A1CD2F}
-		{AE853E82-54F8-4F3F-B65D-CC43945A2D4C} = {DAFC6AAB-4A48-4CDC-A0B9-57ECFB1F5FF8}
 		{1E11C6D4-09C1-4735-B4F1-77A27E665BE3} = {369CCF68-18C7-46E8-8D7D-52C22EF631DD}
+		{B27206FE-1333-48A5-B0A4-38C01AFC51D1} = {6E5DC1C3-7D78-4096-A503-5A8A95A1CD2F}
+		{51926345-C1FD-4F6B-A6E6-5AE8FD9F6C43} = {B27206FE-1333-48A5-B0A4-38C01AFC51D1}
+		{8E581EB3-8B6F-422E-861E-AB8727FC7695} = {DAFC6AAB-4A48-4CDC-A0B9-57ECFB1F5FF8}
+		{B7D57996-E78C-42CE-B117-0B1FC3BADE57} = {8E581EB3-8B6F-422E-861E-AB8727FC7695}
+		{E1784EBF-C0F5-4383-8A6C-C5CBA4FC197D} = {8E581EB3-8B6F-422E-861E-AB8727FC7695}
+		{80035779-54D6-41A1-AD0F-CC329149061A} = {8E581EB3-8B6F-422E-861E-AB8727FC7695}
+		{533E2BC0-136F-4562-97C5-E0AB28DF9339} = {6E5DC1C3-7D78-4096-A503-5A8A95A1CD2F}
+		{22EE1FEE-B95F-4DD7-89B1-D1D130AA14A8} = {533E2BC0-136F-4562-97C5-E0AB28DF9339}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{840DDA4F-612C-40F3-ADD8-1024389D947F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -62,13 +82,29 @@ Global
 		{BADBAF09-E04E-4099-9532-4608551B94EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BADBAF09-E04E-4099-9532-4608551B94EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BADBAF09-E04E-4099-9532-4608551B94EF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AE853E82-54F8-4F3F-B65D-CC43945A2D4C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AE853E82-54F8-4F3F-B65D-CC43945A2D4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AE853E82-54F8-4F3F-B65D-CC43945A2D4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AE853E82-54F8-4F3F-B65D-CC43945A2D4C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1E11C6D4-09C1-4735-B4F1-77A27E665BE3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1E11C6D4-09C1-4735-B4F1-77A27E665BE3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1E11C6D4-09C1-4735-B4F1-77A27E665BE3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1E11C6D4-09C1-4735-B4F1-77A27E665BE3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{51926345-C1FD-4F6B-A6E6-5AE8FD9F6C43}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{51926345-C1FD-4F6B-A6E6-5AE8FD9F6C43}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{51926345-C1FD-4F6B-A6E6-5AE8FD9F6C43}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{51926345-C1FD-4F6B-A6E6-5AE8FD9F6C43}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B7D57996-E78C-42CE-B117-0B1FC3BADE57}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B7D57996-E78C-42CE-B117-0B1FC3BADE57}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B7D57996-E78C-42CE-B117-0B1FC3BADE57}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B7D57996-E78C-42CE-B117-0B1FC3BADE57}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1784EBF-C0F5-4383-8A6C-C5CBA4FC197D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1784EBF-C0F5-4383-8A6C-C5CBA4FC197D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1784EBF-C0F5-4383-8A6C-C5CBA4FC197D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1784EBF-C0F5-4383-8A6C-C5CBA4FC197D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{80035779-54D6-41A1-AD0F-CC329149061A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{80035779-54D6-41A1-AD0F-CC329149061A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{80035779-54D6-41A1-AD0F-CC329149061A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{80035779-54D6-41A1-AD0F-CC329149061A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{22EE1FEE-B95F-4DD7-89B1-D1D130AA14A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22EE1FEE-B95F-4DD7-89B1-D1D130AA14A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22EE1FEE-B95F-4DD7-89B1-D1D130AA14A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22EE1FEE-B95F-4DD7-89B1-D1D130AA14A8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

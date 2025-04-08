@@ -1,19 +1,11 @@
-version: '3'
+name: "notifliwy-jaeger"
 
 services:
   jaeger:
     image: jaegertracing/all-in-one:latest
     ports:
-      - "5775:5775/udp"
-      - "6831:6831/udp"
-      - "6832:6832/udp"
-      - "5778:5778"
       - "16686:16686"
-      - "14250:14250"
-      - "14268:14268"
-      - "9411:9411"
       - "4317:4317"
       - "4318:4318"
     environment:
-      - COLLECTOR_ZIPKIN_HOST_PORT=:9411
       - COLLECTOR_OTLP_ENABLED=true

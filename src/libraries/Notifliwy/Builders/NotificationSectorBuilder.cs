@@ -55,13 +55,7 @@ public class NotificationSectorBuilder<TNotification, TEvent>(IServiceCollection
     public NotificationSectorBuilder<TNotification, TEvent> AddCondition<TCondition>()
         where TCondition : class, INotificationCondition<TNotification, TEvent>
     {
-        PendingConditions.AddAction(
-            source: typeof(TCondition), 
-            actionAfter: _ =>
-            {
-                serviceCollection.AddScoped<INotificationCondition<TNotification, TEvent>, TCondition>();
-            });
-        
+        PendingConditions.Add(item: typeof(TCondition));
         return this;
     }
     

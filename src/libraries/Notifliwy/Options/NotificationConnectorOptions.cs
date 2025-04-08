@@ -13,5 +13,5 @@ public class NotificationConnectorOptions<TEvent>
     /// <summary>
     /// Parallel worker handler for <typeparamref name="TEvent"/>
     /// </summary>
-    public required int WorkerCount { get; init; } = 4;
+    public int WorkerCount { get; init; } = 4;
 }
