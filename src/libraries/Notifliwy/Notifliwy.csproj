@@ -23,6 +23,10 @@
     </ItemGroup>
 
     <ItemGroup>
+        <InternalsVisibleTo Include="Notifliwy.Provider.MassTransit.Kafka" />
+    </ItemGroup>
+    
+    <ItemGroup>
       <PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions" Version="2.3.0" />
     </ItemGroup>
 

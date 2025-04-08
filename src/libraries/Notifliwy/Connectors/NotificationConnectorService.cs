@@ -1,14 +1,12 @@
 ﻿using System.Linq;
 using System.Threading;
-using Notifliwy.Diagnostic;
 using System.Threading.Tasks;
 using Notifliwy.Pipes.Interfaces;
 using Notifliwy.Models.Interfaces;
 using Microsoft.Extensions.Hosting;
-using Notifliwy.Diagnostic.Additions;
-using Notifliwy.Handlers.Interfaces;
 using Notifliwy.Extensions;
 using Microsoft.Extensions.DependencyInjection;
+using Notifliwy.Connectors.Router;
 using Notifliwy.Options;
 
 namespace Notifliwy.Connectors;
@@ -30,48 +28,18 @@ public class NotificationConnectorService<TEvent>(
         var executors = connectorScope.ServiceProvider
             .ExecutorsBy<TEvent>()
             .ToArray();
-        
-        var tasks = Enumerable.Range(0, connectorOptions.WorkerCount)
-            .Select(_ => Task.Run(function: async ()
-                => await RunPipeRouter(
-                    executors, 
-                    cancellationToken), 
-                cancellationToken))
-            .ToArray();
 
-        await Task.WhenAll(tasks);
-    }
-
-    internal async Task RunPipeRouter(
-        INotificationExecutor<TEvent>[] executors, 
-        CancellationToken cancellationToken)
-    {
-        var parallelOptions = new ParallelOptions
+        var sharedParallelOptions = new ParallelOptions
         {
             CancellationToken = cancellationToken
         };
+
+        var routerExecute = PipeRouter<TEvent>.CreateInstance(
+                inputPipe: inputPipe, 
+                executors: executors,
+                workerCount: connectorOptions.WorkerCount)
+            .Select((router, _) => router.RunAsync(sharedParallelOptions, cancellationToken));
         
-        while (!cancellationToken.IsCancellationRequested)
-        {
-            await foreach (var inputEvent in inputPipe.AcceptAsync(cancellationToken))
-            {
-                using var activity = DiagnosticActivity.NotifliwySource
-                    .StartConnectorActivity(name: DiagnosticEventData<TEvent>.ConnectorTraceName)
-                    .AddMeter(metricAction: () =>
-                    {
-                        DiagnosticMeter.EventCount.Add(delta: 1, tagList: DiagnosticEventData<TEvent>.TagsBy);
-                    });
-                
-                await Parallel.ForEachAsync(
-                    executors, 
-                    parallelOptions, 
-                    body: async (executor, ct) =>
-                    {
-                        await executor.StartAsync(inputEvent, ct);
-                    });
-            }
-            
-            cancellationToken.ThrowIfCancellationRequested();
-        }
+        await Task.WhenAll(routerExecute);
     }
 }

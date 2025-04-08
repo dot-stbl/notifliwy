@@ -21,7 +21,12 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\src\diagnostic\Notifliwy.OpenTelemetry.Instrumentation\Notifliwy.OpenTelemetry.Instrumentation.csproj" />
+      <ProjectReference Include="..\..\..\src\providers\Notifliwy.Provider.MassTransit.Kafka\Notifliwy.Provider.MassTransit.Kafka.csproj" />
+      <ProjectReference Include="..\Notifliwy.Sample.Kafka\Notifliwy.Sample.Kafka.csproj" />
     </ItemGroup>
+
+    <PropertyGroup>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
     
 </Project>

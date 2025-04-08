@@ -3,8 +3,8 @@
   "profiles": {
     "http": {
       "commandName": "Project",
-      "hotReloadEnabled": true,
-      "applicationUrl": "http://localhost:12000",
+      "dotnetRunMessages": true,
+      "applicationUrl": "http://localhost:40290",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

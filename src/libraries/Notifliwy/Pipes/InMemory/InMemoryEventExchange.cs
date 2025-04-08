@@ -18,7 +18,7 @@ file class InMemoryChannelConstants
 }
 
 /// <inheritdoc />
-public class InMemoryEventExchange<TEvent> : IInMemoryEventExchange<TEvent> 
+public class InMemoryEventExchange<TEvent> : IInMemoryEventExchange<TEvent>
     where TEvent : IEvent
 {
     /// <inheritdoc />
