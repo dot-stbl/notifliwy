@@ -11,7 +11,7 @@ public class CatMeowCondition : INotificationCondition<CatMeowNotification, CatM
         CatMeowEvent inputEvent, 
         CancellationToken cancellationToken = default)
     {
-        return ValueTask.FromResult(inputEvent.KittyMean == "i'm strong kitty");
+        return ValueTask.FromResult(inputEvent.Name.Equals("Yuki"));
     }
 }
 
