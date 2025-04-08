@@ -60,6 +60,8 @@ builder.Services.AddNotifliwyServer(serverBuilder =>
     {
         sectorBuilder.AddMapper<InputNeedNotificationMapper>(); //Add to notification pipeline
     });
+    
+    serverBuilder.AddInMemoryInput(); //Add global for all events, inmemory pipe handling
 });
 
 //...
