@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <TargetFrameworks>net8.0;net7.0;net6.0</TargetFrameworks>
     </PropertyGroup>
 
     <ItemGroup>
@@ -11,12 +11,11 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="OpenTelemetry.Api.ProviderBuilderExtensions" Version="1.*" />
-      <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.11.1" />
+      <PackageReference Include="OpenTelemetry.Api.ProviderBuilderExtensions" Version="1.4.*-1.*" />
     </ItemGroup>
 
     <PropertyGroup>
-        <Version>1.2.0</Version>
+        <Version>1.3.1</Version>
     </PropertyGroup>
     
     <PropertyGroup>
@@ -25,8 +24,8 @@
         <PackageIcon>otlp.icon.main.png</PackageIcon>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <RepositoryUrl>https://github.com/dot-stbl/notifliwy.git</RepositoryUrl>
-        <Description>Notification handle logic, for ASP.NET Core/Hosting application</Description>
-        <PackageTags>notifliwy, notification, event, handler, worker</PackageTags>
+        <Description>OpenTelemetry diagnostic instrument extensions</Description>
+        <PackageTags>notifliwy, trace, meter, metric, opentelemetry, otlp, instrument, provider</PackageTags>
     </PropertyGroup>
     
     <ItemGroup>

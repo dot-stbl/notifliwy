@@ -8,6 +8,7 @@ using Notifliwy.Pipes.InMemory.Interfaces;
 using Notifliwy.Pipes.InMemory.Options;
 using Notifliwy.Pipes.Interfaces;
 using Notifliwy.Provider.MassTransit.Kafka.Pipe;
+using MicrosoftExtensions = Microsoft.Extensions.Options;
 
 namespace Notifliwy.Provider.MassTransit.Kafka.Extensions;
 
@@ -37,13 +38,14 @@ public static class MassTransitKafkaExtensions
             serviceType: typeof(IInputPipe<TEvent>),
             implementationType: typeof(InMemoryInputPipe<TEvent>));
         
-        registrationConfigurator.AddSingleton(new InMemoryExchangeOptions
-        {
-            ChannelOptions = new BoundedChannelOptions(capacity: 10_000)
+        registrationConfigurator.AddSingleton(
+            MicrosoftExtensions.Options.Create(new InMemoryExchangeOptions
             {
-                FullMode = BoundedChannelFullMode.Wait
-            }
-        });
+                ChannelOptions = new BoundedChannelOptions(capacity: 10_000)
+                {
+                    FullMode = BoundedChannelFullMode.Wait
+                }
+            }));
         
         registrationConfigurator.AddScoped<IConsumer<TEvent>, KafkaConsumerPipe<TEvent>>();
         

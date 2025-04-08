@@ -46,6 +46,42 @@ notification and is ready to be sent across the entire Notifliwy pipeline
 
 ---
 
+## Fast start
+
+To add a `Notifliwy` server, you need to add it via `DI`. And in the most minimal version, so that it can 
+receive data from the hosted application itself, you need to add the _following steps_ in the **builder**
+
+```csharp
+//Add server to hosted application in service collection
+builder.Services.AddNotifliwyServer(serverBuilder =>
+{
+    //Assign event to notification for Notifliwy server
+    serverBuilder.AddNotification<NeedNotification, InputEvent>(sectorBuilder =>
+    {
+        sectorBuilder.AddMapper<InputNeedNotificationMapper>(); //Add to notification pipeline
+    });
+});
+
+//...
+
+public record InputEvent : IEvent;
+public record NeedNotification : IEvent;
+
+public class InputNeedNotificationMapper : INotificationMapper<NeedNotification, InputEvent>
+{
+    /// <inheritdoc />
+    public ValueTask<NeedNotification> ConvertAsync(
+        InputEvent inputEvent, 
+        CancellationToken cancellationToken = default)
+    {
+        return ValueTask.FromResult(new NeedNotification
+        {
+            //... cast event to notification
+        });
+    }
+}
+```
+
 ### Providers
 
 Notifliwy provides the main providers for the internal event pipeline.

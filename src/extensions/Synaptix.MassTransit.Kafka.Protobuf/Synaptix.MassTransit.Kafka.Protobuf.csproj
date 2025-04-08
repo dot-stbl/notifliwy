@@ -2,10 +2,9 @@
 
     <PropertyGroup>
         <Nullable>enable</Nullable>
-        <Authors>stbl, Alexander Sergeev</Authors>
-        <TargetFramework>netstandard2.1</TargetFramework>
-        <PackageIcon>stbl.synaptix.gzs.png</PackageIcon>
         <LangVersion>latest</LangVersion>
+        <PackageIcon>stbl.synaptix.gzs.png</PackageIcon>
+        <TargetFramework>netstandard2.1</TargetFramework>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -40,8 +39,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="protobuf-net" Version="*" />
-      <PackageReference Include="MassTransit.Kafka" Version="*" />
+      <PackageReference Include="protobuf-net" Version="3.*" />
+      <PackageReference Include="MassTransit.Kafka" Version="8.4.*" />
     </ItemGroup>
 
     <PropertyGroup>
