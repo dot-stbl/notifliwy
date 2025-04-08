@@ -1,6 +1,7 @@
 using MassTransit;
 using Notifliwy.Sample.Kafka;
 using Notifliwy.Sample.Kafka.Sender;
+using Synaptix.MassTransit.Kafka.Protobuf;
 
 var builder = WebApplication.CreateBuilder(args);
 

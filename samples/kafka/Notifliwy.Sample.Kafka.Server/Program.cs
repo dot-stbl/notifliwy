@@ -4,6 +4,7 @@ using Notifliwy.Dependency;
 using Notifliwy.Provider.MassTransit.Kafka.Extensions;
 using Notifliwy.Sample.Kafka;
 using Notifliwy.Sample.Kafka.Server;
+using Synaptix.MassTransit.Kafka.Protobuf;
 
 var builder = WebApplication.CreateBuilder(args);
 

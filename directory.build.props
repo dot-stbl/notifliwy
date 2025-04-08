@@ -1,0 +1,15 @@
+<Project>
+    <PropertyGroup>
+        <Copyright>Copyright (c) stbl 2025.</Copyright>
+        <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+    </PropertyGroup>
+    
+    <PropertyGroup>
+        <RepositoryType>git</RepositoryType>
+        <RepositoryUrl>https://github.com/dot-stbl/notifliwy.git</RepositoryUrl>
+    </PropertyGroup>
+    
+    <PropertyGroup>
+        <Authors>stbl, Alexander Sergeev</Authors>
+    </PropertyGroup>
+</Project>

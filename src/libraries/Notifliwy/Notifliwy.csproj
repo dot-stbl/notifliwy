@@ -39,24 +39,19 @@
     </ItemGroup>
 
     <PropertyGroup>
-        <Version>1.0.0-beta-02</Version>
+        <Version>1.2.0</Version>
     </PropertyGroup>
 
     <PropertyGroup>
-        <Authors>stbl</Authors>
-        <RepositoryType>git</RepositoryType>
         <PackageIcon>icon.main.png</PackageIcon>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <RepositoryUrl>https://github.com/dot-stbl/notifliwy.git</RepositoryUrl>
-        <Description>OpenTelemetry instrument providers for Notifliwy</Description>
         <PackageTags>notifliwy, notification, event, handler, connector, condition</PackageTags>
     </PropertyGroup>
 
     <PropertyGroup>
-        <Copyright>Copyright (c) stbl 2025.</Copyright>
-        <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+        <Description>.NET library for distributed handler and pipeline for notifications</Description>
     </PropertyGroup>
-
+    
     <PropertyGroup>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
     </PropertyGroup>

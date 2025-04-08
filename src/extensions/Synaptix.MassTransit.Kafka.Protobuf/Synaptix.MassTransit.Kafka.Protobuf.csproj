@@ -1,0 +1,51 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Nullable>enable</Nullable>
+        <Authors>stbl, Alexander Sergeev</Authors>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <PackageIcon>stbl.synaptix.gzs.png</PackageIcon>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <Version>2.1.0</Version>
+    </PropertyGroup>
+    
+    <PropertyGroup>
+        <RepositoryType>git</RepositoryType>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <RepositoryUrl>https://github.com/dot-stbl/notifliwy.git</RepositoryUrl>
+        <PackageTags>masstransit, mt, proto, buf, kafka, provider, extensions, serialization, deserialization</PackageTags>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <Description>Add-on for masstransit kafka with the addition of protobuf serialization and deserialization</Description>
+    </PropertyGroup>
+    
+    <ItemGroup>
+      <None Include="..\..\..\contents\stbl.synaptix.gzs.png">
+        <Pack>True</Pack>
+        <PackagePath/>
+        <Link>stbl.synaptix.gzs.png</Link>
+      </None>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="README.md">
+            <Link>README.md</Link>
+            <Pack>True</Pack>
+            <PackagePath/>
+        </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="protobuf-net" Version="*" />
+      <PackageReference Include="MassTransit.Kafka" Version="*" />
+    </ItemGroup>
+
+    <PropertyGroup>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+    </PropertyGroup>
+    
+</Project>

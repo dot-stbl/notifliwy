@@ -5,8 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Version>1.0.0-beta-02</Version>
-        <Authors />
+        <Version>1.2.0</Version>
     </PropertyGroup>
 
     <ItemGroup>
