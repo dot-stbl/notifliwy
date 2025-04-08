@@ -39,7 +39,7 @@
     </ItemGroup>
 
     <PropertyGroup>
-        <Version>1.0.0-alpha-01</Version>
+        <Version>1.0.0-beta-02</Version>
     </PropertyGroup>
 
     <PropertyGroup>
