@@ -90,7 +90,7 @@ Notifliwy provides the main providers for the internal event pipeline.
 
 | Provider                             | Version | Description                                        |
 |--------------------------------------|---------|----------------------------------------------------|
-| Notifliwy.Provider.MassTransit.Kafka | 1.2.0   | Notifliwy Consumers provider for MassTransit/Kafka |
+| Notifliwy.Provider.MassTransit.Kafka | 1.3.0   | Notifliwy Consumers provider for MassTransit/Kafka |
 
 ### Additional package
 
@@ -99,7 +99,7 @@ Additional libraries adding functionality to the Notifliwy server or related log
 | Package                                 | Version | Description                                                  |
 |-----------------------------------------|---------|--------------------------------------------------------------|
 | Synaptix.MassTransit.Kafka.Protobuf     | 2.1.0   | `Kafka/MassTransit` protobuf **serializer**/**deserializer** |
-| Notifliwy.OpenTelemetry.Instrumentation | 1.2.0   | **OpenTelemetry** instruments extensions for `Notifliwy`     |
+| Notifliwy.OpenTelemetry.Instrumentation | 1.3.0   | **OpenTelemetry** instruments extensions for `Notifliwy`     |
 
 ## Project
 
