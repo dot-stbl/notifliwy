@@ -6,15 +6,12 @@ using Notifliwy.Builders.Interfaces;
 using Notifliwy.Builders.Internals;
 using Notifliwy.Conditions;
 using Notifliwy.Conditions.Interfaces;
-using Notifliwy.Contexts.Compilers;
+using Notifliwy.Contexts;
 using Notifliwy.Contexts.Interfaces;
 using Notifliwy.Exporters.Interfaces;
 using Notifliwy.Extensions;
-using Notifliwy.Handlers;
-using Notifliwy.Handlers.Interfaces;
 using Notifliwy.Mapper.Interfaces;
 using Notifliwy.Models.Interfaces;
-using Notifliwy.Options;
 using Notifliwy.Steps.Interfaces;
 
 namespace Notifliwy.Builders;
@@ -26,23 +23,6 @@ public class NotificationSectorBuilder<TNotification, TEvent>(IServiceCollection
         where TNotification : INotification
         where TEvent : IEvent
 {
-    /// <summary>
-    /// Assigned <see cref="INotificationConditionProcessor{TNotification,TEvent}"/> type
-    /// </summary>
-    protected Type ConditionProcessorOverride { get; private set; } = typeof(NotificationConditionProcessor<TNotification, TEvent>);
-
-    /// <summary>
-    /// Override default <see cref="INotificationConditionProcessor{TNotification,TEvent}"/> to <typeparamref name="TConditionProcessor"/>
-    /// </summary>
-    /// <typeparam name="TConditionProcessor">custom condition processor</typeparam>
-    public NotificationSectorBuilder<TNotification, TEvent> OverrideConditionProcessor<TConditionProcessor>()
-        where TConditionProcessor : class, INotificationConditionProcessor<TNotification, TEvent>
-    {
-        ConditionProcessorOverride = typeof(TConditionProcessor);
-        serviceCollection.AddScoped<INotificationConditionProcessor<TNotification, TEvent>, TConditionProcessor>();
-        return this;
-    }
-
     /// <summary>
     /// Pending <see cref="INotificationCondition{TNotification,TEvent}"/> for addition to the final sector
     /// </summary>
@@ -69,17 +49,17 @@ public class NotificationSectorBuilder<TNotification, TEvent>(IServiceCollection
         serviceCollection.AddScoped<INotificationMapper<TNotification, TEvent>, TMapper>();
         return this;
     }
-
+    
     /// <summary>
     /// Add <see cref="INotificationExporter{TNotification}"/>
     /// </summary>
-    public NotificationSectorBuilder<TNotification, TEvent> AddExporters<TExporter>()
+    public NotificationSectorBuilder<TNotification, TEvent> AddExporter<TExporter>()
         where TExporter : INotificationExporter<TNotification>
     {
         serviceCollection.AddScoped(
             serviceType: typeof(INotificationExporter<TNotification>),
             implementationType: typeof(TExporter));
-        
+
         return this;
     }
 
@@ -105,17 +85,9 @@ public class NotificationSectorBuilder<TNotification, TEvent>(IServiceCollection
     public void RegisterSector()
     {
         serviceCollection.AddScoped(
-            implementationType: typeof(NotificationExecutor<TEvent>),
-            serviceType: typeof(INotificationExecutor<TEvent>));
-        
-        serviceCollection.AddScoped(
-            implementationType: typeof(NotificationHandler<TNotification, TEvent>),
-            serviceType: typeof(INotificationHandler<TEvent>));
-        
-        serviceCollection.AddScoped(
-            implementationType: ConditionProcessorOverride,
+            implementationType: typeof(NotificationConditionProcessor<TNotification, TEvent>),
             serviceType: typeof(INotificationConditionProcessor<TNotification, TEvent>));
-
+        
         var conditions = PendingConditions.ToArray();
         {
             foreach (var condition in conditions)
@@ -124,26 +96,18 @@ public class NotificationSectorBuilder<TNotification, TEvent>(IServiceCollection
                     implementationType: condition,
                     serviceType: typeof(INotificationCondition<TNotification, TEvent>));
             }
-        
-            var conditionOptions = new NotificationConditionOptions<TNotification, TEvent>
-            {
-                UseConditions = conditions.Length != 0,
-                UseSingleCondition = conditions.Length == 1,
-                UseMultiplyConditions = conditions.Length > 1
-            };
-        
-            serviceCollection.AddSingleton(conditionOptions);
         }
         
         foreach (var pipelineBuilder in StagesBuilders.ToArray())
         {
             pipelineBuilder.BuildPipeline(serviceCollection);
         }
+
+        serviceCollection.AddScoped(typeof(SectorBlock<TNotification, TEvent>));
         
-        serviceCollection.AddScoped<
-            INotificationSector<TNotification, TEvent>, 
-            NotificationSector<TNotification, TEvent>>();
-        
-        serviceCollection.AddScoped<SectorRuntimeCompiler<TNotification, TEvent>>();
+        //as full generic
+        serviceCollection.AddScoped(
+            serviceType: typeof(INotificationSector<TEvent>),
+            implementationType: typeof(NotificationSector<TNotification, TEvent>));
     }
 }

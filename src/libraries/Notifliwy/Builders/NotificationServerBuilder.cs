@@ -100,7 +100,7 @@ public class NotificationServerBuilder(IServiceCollection serviceCollection)
         {
             connectorsBuilder.BuildConnector(serviceCollection);
         }
-        
+
         return serviceCollection;
     }
     

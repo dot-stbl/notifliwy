@@ -48,6 +48,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "extensions", "extensions", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Synaptix.MassTransit.Kafka.Protobuf", "src\extensions\Synaptix.MassTransit.Kafka.Protobuf\Synaptix.MassTransit.Kafka.Protobuf.csproj", "{22EE1FEE-B95F-4DD7-89B1-D1D130AA14A8}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "inmemory", "inmemory", "{07CF6EDE-3AAE-48CA-94EE-BCCA25F38313}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Notifliwy.Sample.InMemory", "samples\inmemory\Notifliwy.Sample.InMemory\Notifliwy.Sample.InMemory.csproj", "{5113BB43-5C87-4AD5-80B8-31BA057CD6B1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -68,6 +72,8 @@ Global
 		{80035779-54D6-41A1-AD0F-CC329149061A} = {8E581EB3-8B6F-422E-861E-AB8727FC7695}
 		{533E2BC0-136F-4562-97C5-E0AB28DF9339} = {6E5DC1C3-7D78-4096-A503-5A8A95A1CD2F}
 		{22EE1FEE-B95F-4DD7-89B1-D1D130AA14A8} = {533E2BC0-136F-4562-97C5-E0AB28DF9339}
+		{07CF6EDE-3AAE-48CA-94EE-BCCA25F38313} = {DAFC6AAB-4A48-4CDC-A0B9-57ECFB1F5FF8}
+		{5113BB43-5C87-4AD5-80B8-31BA057CD6B1} = {07CF6EDE-3AAE-48CA-94EE-BCCA25F38313}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{840DDA4F-612C-40F3-ADD8-1024389D947F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -106,5 +112,9 @@ Global
 		{22EE1FEE-B95F-4DD7-89B1-D1D130AA14A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{22EE1FEE-B95F-4DD7-89B1-D1D130AA14A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{22EE1FEE-B95F-4DD7-89B1-D1D130AA14A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5113BB43-5C87-4AD5-80B8-31BA057CD6B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5113BB43-5C87-4AD5-80B8-31BA057CD6B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5113BB43-5C87-4AD5-80B8-31BA057CD6B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5113BB43-5C87-4AD5-80B8-31BA057CD6B1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

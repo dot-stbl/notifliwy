@@ -4,6 +4,10 @@ using System.Threading.Tasks;
 
 namespace Notifliwy.Extensions;
 
+/// <summary>
+/// Project <see cref="IEnumerable{T}"/> extensions
+///     -> <c>async</c> versions
+/// </summary>
 internal static class EnumerableExtensions
 {
     /// <summary>

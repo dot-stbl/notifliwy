@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Extensions.DependencyInjection;
-using Notifliwy.Builders.Internals.Interfaces;
-using Notifliwy.Models.Interfaces;
 using Notifliwy.Steps.Interfaces;
+using System.Collections.Generic;
+using Notifliwy.Models.Interfaces;
+using Notifliwy.Builders.Internals.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Notifliwy.Builders.Internals;
 
@@ -32,11 +32,28 @@ public class PipelineBuilder<TNotification> : IStagesBuilder
     /// <inheritdoc />
     public void BuildPipeline(IServiceCollection serviceCollection)
     {
-        foreach (var stepType in LinkedSteps.ToArray())
+        var stepTypes = LinkedSteps.ToArray();
+
+        if (stepTypes.Length == 0)
         {
-            serviceCollection.AddScoped(
-                serviceType: typeof(INotificationStep<TNotification>),
-                implementationType: stepType);
+            return;
         }
+        
+        foreach (var stepType in stepTypes)
+        {
+            serviceCollection.AddScoped(stepType);
+        }
+        
+        serviceCollection.AddScoped(
+            serviceType: typeof(INotificationPipeline<TNotification>),
+            implementationFactory: provider =>
+            {
+                var assignedSteps = stepTypes
+                    .Select(provider.GetRequiredService)
+                    .Cast<INotificationStep<TNotification>>()
+                    .ToArray();
+
+                return new NotificationPipeline<TNotification>(assignedSteps);
+            });
     }
 }
