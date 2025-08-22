@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Notifliwy.Conditions.Interfaces;
-using Notifliwy.Models.Interfaces;
 
 namespace Notifliwy.Conditions;
 
@@ -10,14 +9,12 @@ namespace Notifliwy.Conditions;
 /// Derive default type from <see cref="INotificationConditionProcessor{TNotification,TEvent}"/>
 /// </summary>
 /// <inheritdoc />
-internal class NotificationConditionProcessor<TNotification, TEvent> 
+internal class NotificationConditionProcessor<TNotification, TEvent>
     : INotificationConditionProcessor<TNotification, TEvent>
-        where TNotification : INotification
-        where TEvent : IEvent
 {
     /// <inheritdoc />
     public async ValueTask<bool> AllowConditionAsync(
-        TEvent inputEvent, 
+        TEvent inputEvent,
         INotificationCondition<TNotification, TEvent> condition,
         CancellationToken cancellationToken = default)
     {
@@ -26,7 +23,7 @@ internal class NotificationConditionProcessor<TNotification, TEvent>
 
     /// <inheritdoc />
     public async ValueTask<bool> AllowConditionsAsync(
-        TEvent inputEvent, 
+        TEvent inputEvent,
         IReadOnlyCollection<INotificationCondition<TNotification, TEvent>> conditions,
         CancellationToken cancellationToken = default)
     {
@@ -37,7 +34,7 @@ internal class NotificationConditionProcessor<TNotification, TEvent>
                 return false;
             }
         }
-        
+
         return true;
     }
 }

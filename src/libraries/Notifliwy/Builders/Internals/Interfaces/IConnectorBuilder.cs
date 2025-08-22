@@ -4,7 +4,7 @@ using Notifliwy.Connectors;
 namespace Notifliwy.Builders.Internals.Interfaces;
 
 /// <summary>
-/// <see cref="NotificationConnectorService{TEvent}"/> builder
+/// <see cref="NotificationConnector{TEvent}"/> builder
 /// </summary>
 public interface IConnectorBuilder
 {

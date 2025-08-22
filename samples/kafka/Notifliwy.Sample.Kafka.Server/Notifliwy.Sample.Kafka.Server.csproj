@@ -1,12 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
+        <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.0" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.0" />
         <PackageReference Include="OpenTelemetry" Version="1.11.2" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2"/>
         <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.11.2" />
@@ -21,6 +23,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\..\src\diagnostic\Notifliwy.OpenTelemetry.Instrumentation\Notifliwy.OpenTelemetry.Instrumentation.csproj" />
       <ProjectReference Include="..\..\..\src\providers\Notifliwy.Provider.MassTransit.Kafka\Notifliwy.Provider.MassTransit.Kafka.csproj" />
       <ProjectReference Include="..\Notifliwy.Sample.Kafka\Notifliwy.Sample.Kafka.csproj" />
     </ItemGroup>

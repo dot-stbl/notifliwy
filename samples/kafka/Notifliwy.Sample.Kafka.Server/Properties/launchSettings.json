@@ -4,7 +4,7 @@
     "http": {
       "commandName": "Project",
       "hotReloadEnabled": true,
-      "applicationUrl": "http://localhost:40291",
+      "applicationUrl": "http://localhost:40292",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

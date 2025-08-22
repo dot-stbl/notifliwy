@@ -1,7 +1,6 @@
 using System.Threading;
 using Notifliwy.Pipes.Interfaces;
 using System.Collections.Generic;
-using Notifliwy.Models.Interfaces;
 using System.Runtime.CompilerServices;
 using Notifliwy.Pipes.InMemory.Interfaces;
 
@@ -12,8 +11,7 @@ namespace Notifliwy.Pipes.InMemory;
 /// </summary>
 /// <param name="eventExchange">in memory exchange/queue</param>
 /// <typeparam name="TEvent">current assigned event type</typeparam>
-public class InMemoryInputPipe<TEvent>(IInMemoryEventExchange<TEvent> eventExchange) : IInputPipe<TEvent> 
-    where TEvent : IEvent
+public class InMemoryInputPipe<TEvent>(IInMemoryEventExchange<TEvent> eventExchange) : IInputPipe<TEvent>
 {
     /// <inheritdoc cref="IInputPipe{TEvent}.AcceptAsync"/>
     public async IAsyncEnumerable<TEvent> AcceptAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)

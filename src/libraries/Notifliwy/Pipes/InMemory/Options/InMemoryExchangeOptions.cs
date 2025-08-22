@@ -10,5 +10,5 @@ public class InMemoryExchangeOptions
     /// <summary>
     /// Create channel by this options
     /// </summary>
-    public ChannelOptions? ChannelOptions { get; set; } = null;
+    public ChannelOptions? ChannelOptions { get; init; }
 }

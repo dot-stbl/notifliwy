@@ -4,6 +4,10 @@ using System.Threading.Tasks;
 
 namespace Notifliwy.Extensions;
 
+/// <summary>
+/// Project <see cref="IEnumerable{T}"/> extensions
+///     -> <c>async</c> versions
+/// </summary>
 internal static class EnumerableExtensions
 {
     /// <summary>
@@ -15,7 +19,7 @@ internal static class EnumerableExtensions
         Func<TAccumulate, TSource, Task<TAccumulate>> func)
     {
         var accumulator = seed;
-        
+
         foreach (var item in source)
         {
             accumulator = await func(accumulator, item);

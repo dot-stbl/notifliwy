@@ -5,7 +5,6 @@ using Notifliwy.Builders.Interfaces;
 using Notifliwy.Builders.Internals;
 using Notifliwy.Builders.Internals.Interfaces;
 using Notifliwy.Contexts.Compilers;
-using Notifliwy.Models.Interfaces;
 using Notifliwy.Pipes.InMemory;
 using Notifliwy.Pipes.InMemory.Interfaces;
 using Notifliwy.Pipes.InMemory.Options;
@@ -22,7 +21,7 @@ public class NotificationServerBuilder(IServiceCollection serviceCollection)
     /// <c>Notification</c> type bound to an <c>event</c>
     /// </summary>
     protected Dictionary<Type, HashSet<Type>> AssignedNotifications { get; } = new();
-    
+
     /// <summary>
     /// Added <see cref="INotificationSectorBuilder"/>
     /// </summary>
@@ -32,14 +31,12 @@ public class NotificationServerBuilder(IServiceCollection serviceCollection)
     /// All <see cref="ConnectorsBuilder{TEvent}"/> for this <see cref="Notifliwy"/> server
     /// </summary>
     internal HashSet<IConnectorBuilder> ConnectorsBuilders { get; } = [];
-    
+
     /// <summary>
     /// Add new assigned sector by <typeparamref name="TNotification"/> and <typeparamref name="TEvent"/> 
     /// </summary>
     public NotificationServerBuilder AddNotification<TNotification, TEvent>(
-        Action<NotificationSectorBuilder<TNotification, TEvent>>? sectorBuilder = null) 
-            where TNotification : INotification
-            where TEvent : IEvent
+        Action<NotificationSectorBuilder<TNotification, TEvent>>? sectorBuilder = null)
     {
         var builder = new NotificationSectorBuilder<TNotification, TEvent>(serviceCollection);
         {
@@ -48,9 +45,9 @@ public class NotificationServerBuilder(IServiceCollection serviceCollection)
 
             AssignedNotifications.AddBindings<TNotification, TEvent>();
         }
-        
+
         ConnectorsBuilders.Add(item: new ConnectorsBuilder<TEvent>());
-        
+
         return this;
     }
 
@@ -65,10 +62,10 @@ public class NotificationServerBuilder(IServiceCollection serviceCollection)
         if (configureExchange != null)
         {
             var exchangeOptions = new InMemoryExchangeOptions();
-            configureExchange.Invoke(exchangeOptions);   
+            configureExchange.Invoke(exchangeOptions);
             serviceCollection.AddSingleton(exchangeOptions);
         }
-        
+
         serviceCollection.AddSingleton(
             implementationType: typeof(InMemoryEventExchange<>),
             serviceType: typeof(IInMemoryEventExchange<>));
@@ -76,16 +73,16 @@ public class NotificationServerBuilder(IServiceCollection serviceCollection)
         serviceCollection.AddTransient(
             implementationType: typeof(InMemoryExportPipe<>),
             serviceType: typeof(IExportPipe<>));
-        
+
         serviceCollection.AddTransient(
-            implementationType: typeof(InMemoryInputPipe<>), 
-            serviceType:typeof(IInputPipe<>));
-        
+            implementationType: typeof(InMemoryInputPipe<>),
+            serviceType: typeof(IInputPipe<>));
+
         return this;
     }
 
     #endregion
-    
+
     /// <summary>
     /// Build added <see cref="SectorBuilders"/> 
     /// </summary>
@@ -95,15 +92,15 @@ public class NotificationServerBuilder(IServiceCollection serviceCollection)
         {
             sectorBuilder.RegisterSector();
         }
-        
+
         foreach (var connectorsBuilder in ConnectorsBuilders)
         {
             connectorsBuilder.BuildConnector(serviceCollection);
         }
-        
+
         return serviceCollection;
     }
-    
+
     /// <summary>
     /// Create new instance of <see cref="NotificationServerBuilder"/>
     /// </summary>

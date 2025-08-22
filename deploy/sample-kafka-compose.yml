@@ -1,6 +1,15 @@
 name: "notifliwy-kafka"
 
 services:
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686"
+      - "4317:4317"
+      - "4318:4318"
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+  
   zookeeper:
     image: confluentinc/cp-zookeeper:7.3.0
     container_name: zookeeper

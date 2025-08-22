@@ -1,7 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using Notifliwy.Models.Interfaces;
 
 namespace Notifliwy.Conditions.Interfaces;
 
@@ -11,8 +10,6 @@ namespace Notifliwy.Conditions.Interfaces;
 /// <typeparam name="TNotification">assigned notification type</typeparam>
 /// <typeparam name="TEvent">assigned event type</typeparam>
 public interface INotificationConditionProcessor<TNotification, TEvent>
-    where TNotification : INotification
-    where TEvent : IEvent
 {
     /// <summary>
     /// Allow <paramref name="inputEvent"/> from <paramref name="condition"/>
@@ -22,7 +19,7 @@ public interface INotificationConditionProcessor<TNotification, TEvent>
         TEvent inputEvent,
         INotificationCondition<TNotification, TEvent> condition,
         CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Allow <paramref name="inputEvent"/> from <paramref name="conditions"/>
     /// </summary>

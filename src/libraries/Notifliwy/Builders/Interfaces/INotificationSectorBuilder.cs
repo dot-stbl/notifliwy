@@ -8,7 +8,7 @@ namespace Notifliwy.Builders.Interfaces;
 public interface INotificationSectorBuilder
 {
     /// <summary>
-    /// Collect all added service to <see cref="INotificationSector{TNotification,TEvent}"/>
+    /// Collect all added service to <see cref="INotificationSector{TEvent}"/>
     /// </summary>
     public void RegisterSector();
 }

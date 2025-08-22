@@ -1,24 +1,22 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Extensions.DependencyInjection;
-using Notifliwy.Builders.Internals.Interfaces;
-using Notifliwy.Models.Interfaces;
 using Notifliwy.Steps.Interfaces;
+using System.Collections.Generic;
+using Notifliwy.Builders.Internals.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Notifliwy.Builders.Internals;
 
 /// <summary>
-/// Global stages builder for assigned <see cref="INotification"/> type
+/// Global stages builder for assigned <c>Notification</c> type
 /// </summary>
-public class PipelineBuilder<TNotification> : IStagesBuilder 
-    where TNotification : INotification
+public class PipelineBuilder<TNotification> : IStagesBuilder
 {
     /// <summary>
     /// Current linked steps
     /// </summary>
     private IList<Type> LinkedSteps { get; } = [];
-    
+
     /// <summary>
     /// Add <typeparamref name="TStep"/> to stages of processing <c>notification</c>
     /// </summary>
@@ -28,15 +26,32 @@ public class PipelineBuilder<TNotification> : IStagesBuilder
         LinkedSteps.Add(item: typeof(TStep));
         return this;
     }
-    
+
     /// <inheritdoc />
     public void BuildPipeline(IServiceCollection serviceCollection)
     {
-        foreach (var stepType in LinkedSteps.ToArray())
+        var stepTypes = LinkedSteps.ToArray();
+
+        if (stepTypes.Length == 0)
         {
-            serviceCollection.AddScoped(
-                serviceType: typeof(INotificationStep<TNotification>),
-                implementationType: stepType);
+            return;
         }
+
+        foreach (var stepType in stepTypes)
+        {
+            serviceCollection.AddScoped(stepType);
+        }
+
+        serviceCollection.AddScoped(
+            serviceType: typeof(INotificationPipeline<TNotification>),
+            implementationFactory: provider =>
+            {
+                var assignedSteps = stepTypes
+                    .Select(provider.GetRequiredService)
+                    .Cast<INotificationStep<TNotification>>()
+                    .ToArray();
+
+                return new NotificationPipeline<TNotification>(assignedSteps);
+            });
     }
 }

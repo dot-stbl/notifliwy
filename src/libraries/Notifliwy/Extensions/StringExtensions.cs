@@ -20,7 +20,7 @@ internal static class StringExtensions
 
         var disableFrontDelimiter = true;
         var nextSymbolStartsNewWord = true;
-        
+
         foreach (var symbol in source)
         {
             if (Delimiters.Contains(symbol))
@@ -56,7 +56,7 @@ internal static class StringExtensions
 
         return builder.ToString();
     }
-    
+
     /// <summary>
     /// Convert <paramref name="source"/> to <c>DotCase</c>
     /// </summary>
@@ -71,10 +71,10 @@ internal static class StringExtensions
         return SymbolsPipe(
             source,
             mainDelimiter: '.',
-            newWordSymbolHandler: (s, disableFrontDelimiter) 
+            newWordSymbolHandler: (s, disableFrontDelimiter)
                 => disableFrontDelimiter ? [char.ToLowerInvariant(s)] : ['.', char.ToLowerInvariant(s)]);
     }
-    
+
     /// <summary>
     /// Convert <paramref name="source"/> to <c>CamelCase</c>
     /// </summary>
@@ -89,10 +89,10 @@ internal static class StringExtensions
         return SymbolsPipe(
             source,
             mainDelimiter: '\0',
-            newWordSymbolHandler: (s, disableFrontDelimiter) 
+            newWordSymbolHandler: (s, disableFrontDelimiter)
                 => disableFrontDelimiter ? [char.ToLowerInvariant(s)] : [char.ToUpperInvariant(s)]);
     }
-    
+
     /// <summary>
     /// Convert <paramref name="source"/> to <c>KebabCase</c>
     /// </summary>
@@ -107,10 +107,10 @@ internal static class StringExtensions
         return SymbolsPipe(
             source,
             mainDelimiter: '-',
-            newWordSymbolHandler: (s, disableFrontDelimiter) 
+            newWordSymbolHandler: (s, disableFrontDelimiter)
                 => disableFrontDelimiter ? [char.ToLowerInvariant(s)] : ['-', char.ToLowerInvariant(s)]);
     }
-    
+
     /// <summary>
     /// Convert <paramref name="source"/> to <c>SnakeCase</c>
     /// </summary>
@@ -125,10 +125,10 @@ internal static class StringExtensions
         return SymbolsPipe(
             source,
             mainDelimiter: '_',
-            newWordSymbolHandler: (s, disableFrontDelimiter) 
+            newWordSymbolHandler: (s, disableFrontDelimiter)
                 => disableFrontDelimiter ? [char.ToLowerInvariant(s)] : ['_', char.ToLowerInvariant(s)]);
     }
-    
+
     /// <summary>
     /// Convert <paramref name="source"/> to <c>PascalCase</c>
     /// </summary>
@@ -145,7 +145,7 @@ internal static class StringExtensions
             mainDelimiter: '\0',
             newWordSymbolHandler: (s, _) => [char.ToUpperInvariant(s)]);
     }
-    
+
     /// <summary>
     /// Convert <paramref name="source"/> to <c>TrainCase</c>
     /// </summary>
@@ -160,7 +160,7 @@ internal static class StringExtensions
         return SymbolsPipe(
             source,
             mainDelimiter: '-',
-            newWordSymbolHandler: (s, disableFrontDelimiter) 
+            newWordSymbolHandler: (s, disableFrontDelimiter)
                 => disableFrontDelimiter ? [char.ToUpperInvariant(s)] : ['-', char.ToUpperInvariant(s)]);
     }
 }

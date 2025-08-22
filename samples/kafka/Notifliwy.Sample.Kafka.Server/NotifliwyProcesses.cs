@@ -1,5 +1,9 @@
+using System.Text.Json;
 using Notifliwy.Conditions.Interfaces;
+using Notifliwy.Exporters.Interfaces;
+using Notifliwy.Extensions.System;
 using Notifliwy.Mapper.Interfaces;
+using Notifliwy.Steps.Interfaces;
 
 namespace Notifliwy.Sample.Kafka.Server;
 
@@ -8,7 +12,7 @@ public class CatMeowCondition : INotificationCondition<CatMeowNotification, CatM
 {
     /// <inheritdoc />
     public ValueTask<bool> AllowItAsync(
-        CatMeowEvent inputEvent, 
+        CatMeowEvent inputEvent,
         CancellationToken cancellationToken = default)
     {
         return ValueTask.FromResult(inputEvent.Name.Equals("Yuki"));
@@ -20,7 +24,7 @@ public class CatMeowMapper : INotificationMapper<CatMeowNotification, CatMeowEve
 {
     /// <inheritdoc />
     public ValueTask<CatMeowNotification> ConvertAsync(
-        CatMeowEvent inputEvent, 
+        CatMeowEvent inputEvent,
         CancellationToken cancellationToken = default)
     {
         return ValueTask.FromResult(new CatMeowNotification
@@ -29,3 +33,84 @@ public class CatMeowMapper : INotificationMapper<CatMeowNotification, CatMeowEve
         });
     }
 }
+
+#region Pipeline
+
+/// <inheritdoc />
+public class ColorNotificationStep : INotificationStep<CatMeowNotification>
+{
+    /// <inheritdoc />
+    public ValueTask<CatMeowNotification> AggregateAsync(
+        CatMeowNotification notification,
+        CancellationToken cancellationToken = default)
+    {
+        notification.Color = $"{RandomExtensions.NextEnum<ConsoleColor>()}";
+
+        return ValueTask.FromResult(notification);
+    }
+}
+
+/// <inheritdoc />
+public class ClearNotificationStep : INotificationStep<CatMeowNotification>
+{
+    /// <inheritdoc />
+    public ValueTask<CatMeowNotification> AggregateAsync(
+        CatMeowNotification notification,
+        CancellationToken cancellationToken = default)
+    {
+        notification.Color = string.Empty;
+        notification.KittyMean = string.Empty;
+
+        return ValueTask.FromResult(notification);
+    }
+}
+
+/// <inheritdoc />
+public class ConstantColorNotificationStep : INotificationStep<CatMeowNotification>
+{
+    /// <inheritdoc />
+    public ValueTask<CatMeowNotification> AggregateAsync(
+        CatMeowNotification notification,
+        CancellationToken cancellationToken = default)
+    {
+        if (Random.Shared.Next(0, 100) <= 50)
+        {
+            return ValueTask.FromResult(notification);
+        }
+
+        notification.Color = "Gradient";
+        notification.KittyMean = "MOW";
+
+        return ValueTask.FromResult(notification);
+    }
+}
+
+/// <inheritdoc />
+public class CatNotificationConsoleExporter : INotificationExporter<CatMeowNotification>
+{
+    /// <inheritdoc />
+    public async ValueTask ThrowAsync(
+        CatMeowNotification notification,
+        CancellationToken cancellationToken = default)
+    {
+        await Console.Out.WriteLineAsync(JsonSerializer.Serialize(notification));
+    }
+}
+
+/// <inheritdoc />
+public class CatNotificationDatabaseExporter(TempDbContext dbContext) : INotificationExporter<CatMeowNotification>
+{
+    /// <inheritdoc />
+    public async ValueTask ThrowAsync(
+        CatMeowNotification notification,
+        CancellationToken cancellationToken = default)
+    {
+        await dbContext.Notifications.AddAsync(
+            entity: notification,
+            cancellationToken);
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
+}
+
+#endregion

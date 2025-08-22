@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Concurrent;
 
 namespace Notifliwy.Extensions;
 
 internal static class DictionaryExtensions
 {
-    /// <inheritdoc cref="ConcurrentDictionary{TKey,TValue}.AddOrUpdate(TKey,System.Func{TKey,TValue},System.Func{TKey,TValue,TValue})"/>
     public static void AddOrUpdate<TKey, TValue>(
         this IDictionary<TKey, TValue> dictionary,
         TKey key,

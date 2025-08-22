@@ -12,8 +12,8 @@ public class ProtobufKafkaSerializerFactory : IKafkaSerializerFactory
     /// <summary>
     /// Protobuf-net content type
     /// </summary>
-    public ContentType ContentType { get; } = new ("application/x-protobuf-net");
-    
+    public ContentType ContentType { get; } = new("application/x-protobuf-net");
+
     /// <summary>
     /// Assigned <see cref="Confluent.Kafka.IDeserializer{T}"/>
     /// </summary>
