@@ -8,7 +8,7 @@ namespace Notifliwy.Provider.MassTransit.Kafka.Pipe;
 /// Base <c>Kafka</c> exporter from <see cref="IConsumer{TMessage}"/> without <see cref="NotificationConnector{TEvent}"/>
 /// </summary>
 /// <typeparam name="TEvent">assigned class event type</typeparam>
-public class KafkaConsumerPipe<TEvent>(IEnumerable<INotificationSector<TEvent>> notificationSectors) : IConsumer<TEvent> 
+public class KafkaConsumerPipe<TEvent>(IEnumerable<INotificationSector<TEvent>> notificationSectors) : IConsumer<TEvent>
     where TEvent : class
 {
     /// <inheritdoc />

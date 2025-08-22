@@ -14,6 +14,6 @@ public static class TraceBuilderExtensions
     public static TracerProviderBuilder AddNotifliwyServerInstrumentation(
         this TracerProviderBuilder providerBuilder)
     {
-        return providerBuilder.AddSource(DiagnosticActivity.NotifliwySource.Name); 
+        return providerBuilder.AddSource(DiagnosticActivity.NotifliwySource.Name);
     }
 }

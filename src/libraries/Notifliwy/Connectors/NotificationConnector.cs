@@ -31,15 +31,15 @@ public class NotificationConnector<TEvent>(
 
         await using var connectorScope = scopeFactory.CreateAsyncScope()
             .SectorBy<TEvent>(out var sectors);
-        
+
         logger.LogDebug(message: "Assigned sectors: {sector.count}", sectors.Length);
-        
+
         while (!cancellationToken.IsCancellationRequested)
         {
             await foreach (var handledEvent in inputPipe.AcceptAsync(cancellationToken))
             {
                 using var activity = DiagnosticActivity.NotifliwySource.StartConnectorActivity<TEvent>();
-                
+
                 await Parallel.ForEachAsync(
                     source: sectors,
                     parallelOptions: sharedParallelOptions,

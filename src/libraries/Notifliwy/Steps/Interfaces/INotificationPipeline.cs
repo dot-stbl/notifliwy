@@ -20,7 +20,7 @@ public interface INotificationPipeline<TNotification>
     /// Invoke pipeline processing by <see cref="CurrentSteps"/>
     /// </summary>
     public ValueTask<TNotification> InvokePipeline(
-        TNotification notification, 
+        TNotification notification,
         CancellationToken cancellationToken = default);
 }
 
@@ -51,7 +51,7 @@ public class NotificationPipeline<TNotification> : INotificationPipeline<TNotifi
             };
         }
     }
-    
+
     /// <inheritdoc />
     public IReadOnlyCollection<INotificationStep<TNotification>> CurrentSteps { get; }
 
@@ -59,10 +59,10 @@ public class NotificationPipeline<TNotification> : INotificationPipeline<TNotifi
     /// Compiled function for <see cref="INotificationStep{TNotification}"/>
     /// </summary>
     internal Func<TNotification, CancellationToken, ValueTask<TNotification>> CompiledPipeline { get; init; }
-    
+
     /// <inheritdoc />
     public async ValueTask<TNotification> InvokePipeline(
-        TNotification notification, 
+        TNotification notification,
         CancellationToken cancellationToken = default)
     {
         return await CompiledPipeline(notification, cancellationToken);

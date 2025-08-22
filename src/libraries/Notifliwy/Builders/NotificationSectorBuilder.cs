@@ -24,7 +24,7 @@ public class NotificationSectorBuilder<TNotification, TEvent>(IServiceCollection
     /// Pending <see cref="INotificationCondition{TNotification,TEvent}"/> for addition to the final sector
     /// </summary>
     protected IList<Type> PendingConditions { get; } = [];
-    
+
     /// <summary>
     /// Add to condition pipeline <typeparamref name="TCondition"/>
     /// </summary>
@@ -35,7 +35,7 @@ public class NotificationSectorBuilder<TNotification, TEvent>(IServiceCollection
         PendingConditions.Add(item: typeof(TCondition));
         return this;
     }
-    
+
     /// <summary>
     /// Add to mapper event pipeline <typeparamref name="TMapper"/>
     /// </summary>
@@ -46,7 +46,7 @@ public class NotificationSectorBuilder<TNotification, TEvent>(IServiceCollection
         serviceCollection.AddScoped<INotificationMapper<TNotification, TEvent>, TMapper>();
         return this;
     }
-    
+
     /// <summary>
     /// Add <see cref="INotificationExporter{TNotification}"/>
     /// </summary>
@@ -64,7 +64,7 @@ public class NotificationSectorBuilder<TNotification, TEvent>(IServiceCollection
     /// Current assigned pipeline builder
     /// </summary>
     internal IList<PipelineBuilder<TNotification>> StagesBuilders { get; } = [];
-    
+
     /// <summary>
     /// Configure pipeline with <see cref="INotificationStep{TNotification}"/>
     /// </summary>
@@ -74,17 +74,17 @@ public class NotificationSectorBuilder<TNotification, TEvent>(IServiceCollection
         StagesBuilders.AddAction(
             source: new PipelineBuilder<TNotification>(),
             actionAfter: pipelineBuilder.Invoke);
-        
+
         return this;
     }
-    
+
     /// <inheritdoc />
     public void RegisterSector()
     {
         serviceCollection.AddScoped(
             implementationType: typeof(NotificationConditionProcessor<TNotification, TEvent>),
             serviceType: typeof(INotificationConditionProcessor<TNotification, TEvent>));
-        
+
         var conditions = PendingConditions.ToArray();
         {
             foreach (var condition in conditions)
@@ -94,14 +94,14 @@ public class NotificationSectorBuilder<TNotification, TEvent>(IServiceCollection
                     serviceType: typeof(INotificationCondition<TNotification, TEvent>));
             }
         }
-        
+
         foreach (var pipelineBuilder in StagesBuilders.ToArray())
         {
             pipelineBuilder.BuildPipeline(serviceCollection);
         }
 
         serviceCollection.AddScoped(typeof(SectorBlock<TNotification, TEvent>));
-        
+
         //as full generic
         serviceCollection.AddTransient(
             serviceType: typeof(INotificationSector<TEvent>),

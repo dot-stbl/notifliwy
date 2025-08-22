@@ -45,7 +45,7 @@ public class TestMapper : INotificationMapper<TestNotification, TestEvent>
 public class TestCondition : INotificationCondition<TestNotification, TestEvent>
 {
     public ValueTask<bool> AllowItAsync(
-        TestEvent inputEvent, 
+        TestEvent inputEvent,
         CancellationToken cancellationToken = default)
     {
         return ValueTask.FromResult(inputEvent.InputValue % 5 == 0);

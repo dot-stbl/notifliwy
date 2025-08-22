@@ -23,7 +23,7 @@ public static class MassTransitKafkaExtensions
     /// <param name="registrationConfigurator"><c>rider</c> registration configuration options</param>
     /// <typeparam name="TEvent">assigned event as consume message</typeparam>
     public static IConsumerRegistrationConfigurator<KafkaConsumerPipe<TEvent>> AddNotifliwyPipe<TEvent>(
-        this IRiderRegistrationConfigurator registrationConfigurator) 
+        this IRiderRegistrationConfigurator registrationConfigurator)
             where TEvent : class
     {
         registrationConfigurator.AddSingleton(
@@ -33,11 +33,11 @@ public static class MassTransitKafkaExtensions
         registrationConfigurator.AddTransient(
             serviceType: typeof(IExportPipe<TEvent>),
             implementationType: typeof(InMemoryExportPipe<TEvent>));
-        
+
         registrationConfigurator.AddTransient(
             serviceType: typeof(IInputPipe<TEvent>),
             implementationType: typeof(InMemoryInputPipe<TEvent>));
-        
+
         registrationConfigurator.AddSingleton(
             MicrosoftExtensions.Options.Create(new InMemoryExchangeOptions
             {
@@ -46,9 +46,9 @@ public static class MassTransitKafkaExtensions
                     FullMode = BoundedChannelFullMode.Wait
                 }
             }));
-        
+
         registrationConfigurator.AddScoped<IConsumer<TEvent>, KafkaConsumerPipe<TEvent>>();
-        
+
         return registrationConfigurator.AddConsumer<KafkaConsumerPipe<TEvent>>();
     }
 
@@ -60,7 +60,7 @@ public static class MassTransitKafkaExtensions
     /// <param name="withConnector">add consumer with integration <see cref="NotificationConnector{TEvent}"/></param>
     /// <typeparam name="TEvent">assigned event as consume message</typeparam>
     /// <typeparam name="TId">kafka id</typeparam>
-    public static IKafkaTopicReceiveEndpointConfigurator<TId, TEvent> ConfigureNotifliwyPipe<TId,TEvent>(
+    public static IKafkaTopicReceiveEndpointConfigurator<TId, TEvent> ConfigureNotifliwyPipe<TId, TEvent>(
         this IKafkaTopicReceiveEndpointConfigurator<TId, TEvent> endpointConfigurator,
         IRiderRegistrationContext registrationContext,
         bool withConnector = false)
@@ -74,7 +74,7 @@ public static class MassTransitKafkaExtensions
         {
             endpointConfigurator.ConfigureConsumer<KafkaConsumerPipe<TEvent>>(registrationContext);
         }
-        
+
         return endpointConfigurator;
     }
 
@@ -99,7 +99,7 @@ public static class MassTransitKafkaExtensions
         {
             endpointConfigurator.ConfigureConsumer<KafkaConsumerPipe<TEvent>>(registrationContext);
         }
-        
+
         return endpointConfigurator;
     }
 }

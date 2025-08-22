@@ -7,7 +7,7 @@ namespace Notifliwy.Diagnostic.Additions;
 
 internal class DiagnosticEventConstants
 {
-    public static readonly EventId ErrorSectorEvent = new (43_0002);
+    public static readonly EventId ErrorSectorEvent = new(43_0002);
 }
 
 internal class DiagnosticConstants
@@ -16,7 +16,7 @@ internal class DiagnosticConstants
     /// All traces prefix
     /// </summary>
     public static readonly string Prefix = nameof(Notifliwy).ToLower();
-    
+
     public static class PropertyNames
     {
         /// <summary>
@@ -43,11 +43,11 @@ internal class DiagnosticEventData<TEvent>
     /// Assigned Connector activity name
     /// </summary>
     public static readonly string ConnectorTraceName = $"{DiagnosticConstants.Prefix}.connector";
-    
+
     /// <summary>
     /// Tag list by <typeparamref name="TEvent"/>
     /// </summary>
-    public static readonly TagList TagsBy = new (
+    public static readonly TagList TagsBy = new(
     [
         new KeyValuePair<string, object?>(DiagnosticConstants.PropertyNames.EventType, $"{typeof(TEvent)}".ToDotCase())
     ]);

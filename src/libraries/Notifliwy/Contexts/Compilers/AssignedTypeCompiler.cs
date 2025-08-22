@@ -12,10 +12,10 @@ internal static class AssignedTypeCompiler
     public static void AddBindings<TNotification, TEvent>(this IDictionary<Type, HashSet<Type>> bindingType)
     {
         (Type EventType, Type NotificationType) typeTuple = (typeof(TEvent), typeof(TNotification));
-        
+
         bindingType.AddOrUpdate(
             typeTuple.EventType,
-            addValueFactory: _ => [ typeTuple.NotificationType ],
+            addValueFactory: _ => [typeTuple.NotificationType],
             updateValueFactory: (_, existList) =>
             {
                 existList.Add(typeTuple.NotificationType);

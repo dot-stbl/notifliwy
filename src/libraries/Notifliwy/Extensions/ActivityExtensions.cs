@@ -29,7 +29,7 @@ internal static class ActivityExtensions
             .StartActivity(DiagnosticEventData<TEvent>.ConnectorTraceName, ActivityKind.Server)
             ?.AddTag(key: DiagnosticConstants.PropertyNames.EventType, DiagnosticEventData<TEvent>.EventSeparation);
     }
-    
+
     /// <summary>
     /// Create custom <see cref="Activity"/> special for <see cref="INotificationSector{TEvent}"/>
     /// </summary>
@@ -45,19 +45,19 @@ internal static class ActivityExtensions
     /// <summary>
     /// Add custom <c>notification</c> and <c>event</c> properties
     /// </summary>
-    public static Activity? AddSectorTags<TNotification, TEvent>(this Activity? activity) 
+    public static Activity? AddSectorTags<TNotification, TEvent>(this Activity? activity)
     {
         return activity
             ?.AddTag(
-                key: DiagnosticConstants.PropertyNames.EventType, 
+                key: DiagnosticConstants.PropertyNames.EventType,
                 value: DiagnosticSectorData<TNotification, TEvent>.EventSeparation)
             .AddTag(
-                key: DiagnosticConstants.PropertyNames.NotificationType, 
+                key: DiagnosticConstants.PropertyNames.NotificationType,
                 value: DiagnosticSectorData<TNotification, TEvent>.NotificationSeparation);
     }
 
     #endregion
-    
+
     #region Exceptions
 
     /// <summary>
@@ -80,8 +80,8 @@ internal static class ActivityExtensions
         }
 
         activity?.AddEvent(
-            new ActivityEvent(SemanticConventions.AttributeExceptionEventName, 
-            timestamp: default, 
+            new ActivityEvent(SemanticConventions.AttributeExceptionEventName,
+            timestamp: default,
             tagsCollection));
     }
 

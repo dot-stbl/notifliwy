@@ -33,12 +33,12 @@ public class MultiplyServiceInstance<TInstance>
     /// Checks if plural instances are being used
     /// </summary>
     public bool IsMultiply => Multiply != null;
-    
+
     /// <summary>
     /// Are there any services in this block at all
     /// </summary>
     public bool UseInstance => Single != null || Multiply?.Length != 0;
-    
+
     /// <summary>
     /// It gets the required type of instances from <paramref name="serviceProvider"/> and fills the block itself
     /// </summary>
@@ -49,7 +49,7 @@ public class MultiplyServiceInstance<TInstance>
             .GetServices<TInstance>()
             .ToArray();
 
-        if (instances.Length == 1 && instances.FirstOrDefault() is {} instance)
+        if (instances.Length == 1 && instances.FirstOrDefault() is { } instance)
         {
             Single = instance;
         }
@@ -66,8 +66,8 @@ public class MultiplyServiceInstance<TInstance>
     public MultiplyServiceInstance(IEnumerable<TInstance> instanceEnumerable)
     {
         var instances = instanceEnumerable as TInstance[] ?? instanceEnumerable.ToArray();
-        
-        if (instances.Length == 1 && instances.FirstOrDefault() is {} instance)
+
+        if (instances.Length == 1 && instances.FirstOrDefault() is { } instance)
         {
             Single = instance;
         }
@@ -85,11 +85,12 @@ public class MultiplyServiceInstance<TInstance>
     /// <summary>
     /// Return nullable <see cref="MultiplyServiceInstance{TInstance}"/>
     /// </summary>
-    public static MultiplyServiceInstance<TInstance> Nullable => new ()
+    public static MultiplyServiceInstance<TInstance> Nullable => new()
     {
-        Multiply = null, Single = default
+        Multiply = null,
+        Single = default
     };
-    
+
     /// <summary>
     /// Compute current class and invoke by single and multiply instances logic async
     /// </summary>
@@ -101,7 +102,7 @@ public class MultiplyServiceInstance<TInstance>
         {
             throw new EmptyInstanceBranchException(typeof(TInstance));
         }
-        
+
         if (IsSingle && Single != null)
         {
             return await singleAction(Single);
@@ -109,7 +110,7 @@ public class MultiplyServiceInstance<TInstance>
 
         return await multiplyAction(Multiply!);
     }
-    
+
     /// <summary>
     /// Compute current class and invoke by single and multiply instances logic async
     /// </summary>
@@ -121,7 +122,7 @@ public class MultiplyServiceInstance<TInstance>
         {
             throw new EmptyInstanceBranchException(typeof(TInstance));
         }
-        
+
         if (IsSingle && Single != null)
         {
             await singleAction(Single);

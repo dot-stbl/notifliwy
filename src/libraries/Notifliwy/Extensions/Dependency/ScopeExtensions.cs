@@ -20,14 +20,14 @@ internal static class ScopeExtensions
         sectorBlock = serviceScope.ServiceProvider.GetRequiredService<SectorBlock<TNotification, TEvent>>();
         return serviceScope;
     }
-    
+
     /// <summary>
     /// Return assigned <see cref="INotificationSector{TEvent}"/> by <typeparamref name="TEvent"/>
     /// </summary>
     public static AsyncServiceScope SectorBy<TEvent>(
         this AsyncServiceScope serviceScope,
         out INotificationSector<TEvent>[] sectors)
-    { 
+    {
         sectors = serviceScope.ServiceProvider.GetServices<INotificationSector<TEvent>>().ToArray();
         return serviceScope;
     }

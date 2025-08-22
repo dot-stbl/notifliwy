@@ -11,7 +11,7 @@ internal class ConnectorsBuilder<TEvent> : IConnectorBuilder
     /// <inheritdoc />
     public void BuildConnector(IServiceCollection serviceCollection)
     {
-        if (serviceCollection.FirstOrDefault(descriptor 
+        if (serviceCollection.FirstOrDefault(descriptor
                 => descriptor.ImplementationType == typeof(NotificationConnector<TEvent>)) == null)
         {
             serviceCollection.AddHostedService<NotificationConnector<TEvent>>();

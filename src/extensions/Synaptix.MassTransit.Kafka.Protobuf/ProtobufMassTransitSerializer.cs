@@ -18,7 +18,7 @@ public class ProtobufMassTransitSerializer<T> : ISerializer<T>, IAsyncSerializer
         {
             return [];
         }
-        
+
         using var protoStream = new MemoryStream();
         Serializer.SerializeWithLengthPrefix(protoStream, data, PrefixStyle.Fixed32);
         return protoStream.ToArray();

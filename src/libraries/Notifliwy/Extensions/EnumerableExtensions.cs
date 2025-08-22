@@ -19,7 +19,7 @@ internal static class EnumerableExtensions
         Func<TAccumulate, TSource, Task<TAccumulate>> func)
     {
         var accumulator = seed;
-        
+
         foreach (var item in source)
         {
             accumulator = await func(accumulator, item);

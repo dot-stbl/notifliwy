@@ -21,7 +21,7 @@ public class InMemoryEventExchange<TEvent> : IInMemoryEventExchange<TEvent>
 {
     /// <inheritdoc />
     public Channel<TEvent> EventExchange { get; }
-    
+
     /// <summary>
     /// Default in memory exchange constructor
     ///     - setup internal exchange <see cref="EventExchange"/>
@@ -29,24 +29,24 @@ public class InMemoryEventExchange<TEvent> : IInMemoryEventExchange<TEvent>
     /// <param name="exchangeOptions">exchange options</param>
     public InMemoryEventExchange(IOptions<InMemoryExchangeOptions>? exchangeOptions)
     {
-        if (exchangeOptions?.Value is {} options)
+        if (exchangeOptions?.Value is { } options)
         {
             switch (options.ChannelOptions)
             {
                 case null:
-                {
-                    break;
-                }
+                    {
+                        break;
+                    }
                 case BoundedChannelOptions boundedOptions:
-                {
-                    EventExchange = Channel.CreateBounded<TEvent>(boundedOptions);
-                    return;
-                }
+                    {
+                        EventExchange = Channel.CreateBounded<TEvent>(boundedOptions);
+                        return;
+                    }
                 case UnboundedChannelOptions unboundedOptions:
-                {
-                    EventExchange = Channel.CreateUnbounded<TEvent>(unboundedOptions);
-                    return;
-                }
+                    {
+                        EventExchange = Channel.CreateUnbounded<TEvent>(unboundedOptions);
+                        return;
+                    }
             }
         }
 
@@ -55,7 +55,7 @@ public class InMemoryEventExchange<TEvent> : IInMemoryEventExchange<TEvent>
         {
             FullMode = BoundedChannelFullMode.Wait
         };
-        
+
         EventExchange = Channel.CreateBounded<TEvent>(channelOptions);
     }
 }

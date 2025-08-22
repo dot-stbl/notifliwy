@@ -19,7 +19,7 @@ public interface INotificationConditionProcessor<TNotification, TEvent>
         TEvent inputEvent,
         INotificationCondition<TNotification, TEvent> condition,
         CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Allow <paramref name="inputEvent"/> from <paramref name="conditions"/>
     /// </summary>

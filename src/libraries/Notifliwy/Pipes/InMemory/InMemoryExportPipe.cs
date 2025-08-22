@@ -10,7 +10,7 @@ namespace Notifliwy.Pipes.InMemory;
 /// </summary>
 /// <param name="eventExchange">in memory exchange/queue</param>
 /// <typeparam name="TEvent">current assigned event type</typeparam>
-public class InMemoryExportPipe<TEvent>(IInMemoryEventExchange<TEvent> eventExchange) : IExportPipe<TEvent> 
+public class InMemoryExportPipe<TEvent>(IInMemoryEventExchange<TEvent> eventExchange) : IExportPipe<TEvent>
 {
     /// <inheritdoc cref="IExportPipe{TEvent}.ExportAsync"/>
     public async ValueTask ExportAsync(TEvent exportEvent, CancellationToken cancellationToken = default)

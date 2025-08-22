@@ -11,7 +11,7 @@ builder.Services.AddMassTransit(configurator =>
     {
         factoryConfigurator.ConfigureEndpoints(context);
     });
-    
+
     configurator.AddConfigureEndpointsCallback((_, endpointConfigurator) =>
     {
         endpointConfigurator.UseCircuitBreaker(configure: breakerConfigurator =>
@@ -19,17 +19,17 @@ builder.Services.AddMassTransit(configurator =>
             breakerConfigurator.ResetInterval = TimeSpan.FromSeconds(5);
         });
     });
-    
+
     configurator.AddRider(configure: registrationConfigurator =>
     {
         registrationConfigurator.AddProducer<CatMeowEvent>(topicName: "meow.event");
-        
+
         registrationConfigurator.UsingKafka(configure: (_, factoryConfigurator) =>
         {
             factoryConfigurator.SetSerializationFactory(new ProtobufKafkaSerializerFactory());
-            
+
             factoryConfigurator.Host(server: "localhost:9092");
-            
+
             factoryConfigurator.TopicEndpoint<CatMeowEvent>(
                 groupId: "meow-group",
                 topicName: "meow.event",
@@ -61,11 +61,11 @@ namespace Notifliwy.Sample.Kafka.Sender
             await using var scope = scopeFactory.CreateAsyncScope();
 
             var topicProducer = scope.ServiceProvider.GetRequiredService<ITopicProducer<CatMeowEvent>>();
-        
+
             while (!stoppingToken.IsCancellationRequested)
             {
                 await topicProducer.Produce(
-                    cancellationToken: stoppingToken, 
+                    cancellationToken: stoppingToken,
                     message: new CatMeowEvent
                     {
                         Name = Random.Shared.Next(0, 10) > 5 ? "Bob" : "Yuki",

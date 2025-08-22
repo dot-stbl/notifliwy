@@ -22,7 +22,7 @@ public class NotificationSector<TNotification, TEvent>(
 {
     /// <inheritdoc />
     public async ValueTask PassThroughAsync(
-        TEvent inputEvent, 
+        TEvent inputEvent,
         CancellationToken cancellationToken = default)
     {
         using var activity = DiagnosticActivity.NotifliwySource.StartSectorActivity<TNotification, TEvent>();
@@ -31,7 +31,7 @@ public class NotificationSector<TNotification, TEvent>(
         {
             await using var scope = scopeFactory.CreateAsyncScope()
                 .BlockBy<TNotification, TEvent>(out var sectorBlock);
-            
+
             await sectorBlock.ProcessingAsync(inputEvent, cancellationToken);
         }
         catch (Exception exception)
@@ -49,7 +49,7 @@ public class NotificationSector<TNotification, TEvent>(
             activity.AddMeter(() =>
             {
                 DiagnosticMeter.SectorProcessingCounter.Add(
-                    delta: 1, 
+                    delta: 1,
                     tagList: DiagnosticSectorData<TNotification, TEvent>.TagsBy);
             });
         }

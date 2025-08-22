@@ -31,7 +31,7 @@ builder.Services.AddMassTransit(configurator =>
     {
         factoryConfigurator.ConfigureEndpoints(context);
     });
-    
+
     configurator.AddConfigureEndpointsCallback((_, endpointConfigurator) =>
     {
         endpointConfigurator.UseCircuitBreaker(configure: breakerConfigurator =>
@@ -39,28 +39,28 @@ builder.Services.AddMassTransit(configurator =>
             breakerConfigurator.ResetInterval = TimeSpan.FromSeconds(5);
         });
     });
-    
+
     configurator.AddRider(configure: registrationConfigurator =>
     {
         registrationConfigurator.AddNotifliwyPipe<CatMeowEvent>();
-        
+
         registrationConfigurator.UsingKafka(configure: (context, factoryConfigurator) =>
         {
             factoryConfigurator.SetSerializationFactory(new ProtobufKafkaSerializerFactory());
-            
+
             factoryConfigurator.Host(server: "localhost:9092");
-            
+
             factoryConfigurator.TopicEndpoint<CatMeowEvent>(
                 groupId: "meow-group",
                 topicName: "meow.event",
                 configure: endpoint =>
                 {
                     endpoint.GroupInstanceId = "notifliwy-cns-01";
-                    
+
                     endpoint.AutoOffsetReset = AutoOffsetReset.Latest;
                     endpoint.SessionTimeout = TimeSpan.FromMilliseconds(45000);
                     endpoint.HeartbeatInterval = TimeSpan.FromMilliseconds(3000);
-                    
+
                     endpoint.CreateIfMissing();
                     endpoint.ConfigureNotifliwyPipe(context);
                 });

@@ -16,7 +16,7 @@ public class PipelineBuilder<TNotification> : IStagesBuilder
     /// Current linked steps
     /// </summary>
     private IList<Type> LinkedSteps { get; } = [];
-    
+
     /// <summary>
     /// Add <typeparamref name="TStep"/> to stages of processing <c>notification</c>
     /// </summary>
@@ -26,7 +26,7 @@ public class PipelineBuilder<TNotification> : IStagesBuilder
         LinkedSteps.Add(item: typeof(TStep));
         return this;
     }
-    
+
     /// <inheritdoc />
     public void BuildPipeline(IServiceCollection serviceCollection)
     {
@@ -36,12 +36,12 @@ public class PipelineBuilder<TNotification> : IStagesBuilder
         {
             return;
         }
-        
+
         foreach (var stepType in stepTypes)
         {
             serviceCollection.AddScoped(stepType);
         }
-        
+
         serviceCollection.AddScoped(
             serviceType: typeof(INotificationPipeline<TNotification>),
             implementationFactory: provider =>

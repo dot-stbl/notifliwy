@@ -31,25 +31,25 @@ public class SectorBlock<TNotification, TEvent>(
     /// </summary>
     public MultiplyServiceInstance<INotificationExporter<TNotification>> ExporterInstances { get; }
         = serviceProvider.ExporterBy<TNotification>().ToMultiplyService();
-    
+
     /// <summary>
     /// Bound <see cref="INotificationPipeline{TNotification}"/> instances
     /// </summary>
     public MultiplyServiceInstance<INotificationPipeline<TNotification>> PipelineInstances { get; }
         = serviceProvider.PipelinesBy<TNotification>().ToMultiplyService();
-    
+
     /// <summary>
     /// Bound <see cref="INotificationCondition{TNotification,TEvent}"/> instances
     /// </summary>
-    public MultiplyServiceInstance<INotificationCondition<TNotification, TEvent>> ConditionInstances { get; } 
+    public MultiplyServiceInstance<INotificationCondition<TNotification, TEvent>> ConditionInstances { get; }
         = serviceProvider.ConditionsBy<TNotification, TEvent>().ToMultiplyService();
-    
+
     /// <summary>
     /// Bound <see cref="INotificationMapper{TNotification,TEvent}"/> instance
     /// </summary>
     public INotificationMapper<TNotification, TEvent> MapperSector { get; }
         = serviceProvider.MapperBy<TNotification, TEvent>();
-    
+
     /// <summary>
     /// The main method that performs all the basic logic for processing events and carrying notification to endpoints
     /// </summary>
@@ -58,16 +58,16 @@ public class SectorBlock<TNotification, TEvent>(
         CancellationToken cancellationToken = default)
     {
         if (!await ConditionInstances.CheckoutInstanceAsync(
-                singleAction: async condition 
+                singleAction: async condition
                     => await conditionProcessor.AllowConditionAsync(inputEvent, condition, cancellationToken),
-                multiplyAction: async conditions 
+                multiplyAction: async conditions
                     => await conditionProcessor.AllowConditionsAsync(inputEvent, conditions, cancellationToken)))
         {
             return;
         }
 
         sectorLogger.LogDebug(
-            message: "{input.event.hash} / {input.event} is allow, continue processing", 
+            message: "{input.event.hash} / {input.event} is allow, continue processing",
             inputEvent?.GetHashCode(), DiagnosticEventData<TEvent>.EventSeparation);
 
         var aggregatedNotification = await MapperSector.ConvertAsync(inputEvent, cancellationToken);
@@ -86,7 +86,7 @@ public class SectorBlock<TNotification, TEvent>(
                     return aggregatedNotification;
                 });
         }
-        
+
         if (!ExporterInstances.UseInstance)
         {
             sectorLogger.LogInformation(JsonSerializer.Serialize(aggregatedNotification));
@@ -94,7 +94,7 @@ public class SectorBlock<TNotification, TEvent>(
         else
         {
             await ExporterInstances.CheckoutInstanceAsync(
-                singleAction: exporter => exporter.ThrowAsync(aggregatedNotification, cancellationToken), 
+                singleAction: exporter => exporter.ThrowAsync(aggregatedNotification, cancellationToken),
                 multiplyAction: async exporters =>
                 {
                     foreach (var exporter in exporters)

@@ -24,11 +24,11 @@ internal static class ServiceProviderExtensions
     /// Return all assigned <see cref="INotificationStep{TNotification}"/>
     /// </summary>
     public static IEnumerable<INotificationPipeline<TNotification>> PipelinesBy<TNotification>(
-        this IServiceProvider serviceProvider) 
+        this IServiceProvider serviceProvider)
     {
         return serviceProvider.GetServices<INotificationPipeline<TNotification>>();
     }
-    
+
     /// <summary>
     /// Create <see cref="INotificationExporter{TNotification}"/> for new scope
     /// </summary>
@@ -37,7 +37,7 @@ internal static class ServiceProviderExtensions
     {
         return serviceProvider.GetServices<INotificationExporter<TNotification>>();
     }
-    
+
     /// <summary>
     /// Get from <paramref name="serviceProvider"/> services as <see cref="INotificationMapper{TNotification,TEvent}"/>
     /// </summary>

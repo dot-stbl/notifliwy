@@ -14,6 +14,6 @@ public static class MetricBuilderExtensions
     public static MeterProviderBuilder AddNotifliwyServerInstrumentation(
         this MeterProviderBuilder providerBuilder)
     {
-        return providerBuilder.AddMeter(DiagnosticMeter.InputCounter.Name); 
+        return providerBuilder.AddMeter(DiagnosticMeter.InputCounter.Name);
     }
 }
