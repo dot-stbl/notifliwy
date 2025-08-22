@@ -66,8 +66,8 @@ builder.Services.AddNotifliwyServer(serverBuilder =>
 
 //...
 
-public record InputEvent : IEvent;
-public record NeedNotification : INotification;
+public record InputEvent;
+public record NeedNotification;
 
 public class InputNeedNotificationMapper : INotificationMapper<NeedNotification, InputEvent>
 {
