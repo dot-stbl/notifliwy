@@ -90,7 +90,7 @@ Notifliwy provides the main providers for the internal event pipeline.
 
 | Provider                             | Version | Description                                        |
 |--------------------------------------|---------|----------------------------------------------------|
-| Notifliwy.Provider.MassTransit.Kafka | 1.3.0   | Notifliwy Consumers provider for MassTransit/Kafka |
+| Notifliwy.Provider.MassTransit.Kafka | 1.4.0   | Notifliwy Consumers provider for MassTransit/Kafka |
 
 ### Additional package
 
