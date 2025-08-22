@@ -5,7 +5,6 @@ using Notifliwy.Builders.Interfaces;
 using Notifliwy.Builders.Internals;
 using Notifliwy.Builders.Internals.Interfaces;
 using Notifliwy.Contexts.Compilers;
-using Notifliwy.Models.Interfaces;
 using Notifliwy.Pipes.InMemory;
 using Notifliwy.Pipes.InMemory.Interfaces;
 using Notifliwy.Pipes.InMemory.Options;
@@ -37,9 +36,7 @@ public class NotificationServerBuilder(IServiceCollection serviceCollection)
     /// Add new assigned sector by <typeparamref name="TNotification"/> and <typeparamref name="TEvent"/> 
     /// </summary>
     public NotificationServerBuilder AddNotification<TNotification, TEvent>(
-        Action<NotificationSectorBuilder<TNotification, TEvent>>? sectorBuilder = null) 
-            where TNotification : INotification
-            where TEvent : IEvent
+        Action<NotificationSectorBuilder<TNotification, TEvent>>? sectorBuilder = null)
     {
         var builder = new NotificationSectorBuilder<TNotification, TEvent>(serviceCollection);
         {
@@ -100,7 +97,7 @@ public class NotificationServerBuilder(IServiceCollection serviceCollection)
         {
             connectorsBuilder.BuildConnector(serviceCollection);
         }
-
+        
         return serviceCollection;
     }
     

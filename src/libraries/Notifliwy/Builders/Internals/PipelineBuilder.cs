@@ -2,17 +2,15 @@
 using System.Linq;
 using Notifliwy.Steps.Interfaces;
 using System.Collections.Generic;
-using Notifliwy.Models.Interfaces;
 using Notifliwy.Builders.Internals.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Notifliwy.Builders.Internals;
 
 /// <summary>
-/// Global stages builder for assigned <see cref="INotification"/> type
+/// Global stages builder for assigned <c>Notification</c> type
 /// </summary>
-public class PipelineBuilder<TNotification> : IStagesBuilder 
-    where TNotification : INotification
+public class PipelineBuilder<TNotification> : IStagesBuilder
 {
     /// <summary>
     /// Current linked steps

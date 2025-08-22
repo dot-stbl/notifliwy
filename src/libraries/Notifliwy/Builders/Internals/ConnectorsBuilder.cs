@@ -2,12 +2,11 @@
 using Microsoft.Extensions.DependencyInjection;
 using Notifliwy.Builders.Internals.Interfaces;
 using Notifliwy.Connectors;
-using Notifliwy.Models.Interfaces;
 
 namespace Notifliwy.Builders.Internals;
 
 /// <inheritdoc />
-internal class ConnectorsBuilder<TEvent> : IConnectorBuilder where TEvent : IEvent
+internal class ConnectorsBuilder<TEvent> : IConnectorBuilder
 {
     /// <inheritdoc />
     public void BuildConnector(IServiceCollection serviceCollection)

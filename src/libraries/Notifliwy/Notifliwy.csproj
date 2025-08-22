@@ -57,7 +57,7 @@
     </ItemGroup>
 
     <PropertyGroup>
-        <Version>1.4.0-rc01</Version>
+        <Version>1.4.0</Version>
     </PropertyGroup>
 
     <PropertyGroup>

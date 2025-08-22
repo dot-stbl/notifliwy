@@ -1,6 +1,5 @@
 ﻿using System.Threading.Channels;
 using Microsoft.Extensions.Options;
-using Notifliwy.Models.Interfaces;
 using Notifliwy.Pipes.InMemory.Interfaces;
 using Notifliwy.Pipes.InMemory.Options;
 
@@ -19,7 +18,6 @@ file class InMemoryChannelConstants
 
 /// <inheritdoc />
 public class InMemoryEventExchange<TEvent> : IInMemoryEventExchange<TEvent>
-    where TEvent : IEvent
 {
     /// <inheritdoc />
     public Channel<TEvent> EventExchange { get; }

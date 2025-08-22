@@ -9,7 +9,6 @@ using Notifliwy.Diagnostic.Additions;
 using Notifliwy.Exporters.Interfaces;
 using Notifliwy.Extensions.Dependency;
 using Notifliwy.Mapper.Interfaces;
-using Notifliwy.Models.Interfaces;
 using Notifliwy.Related;
 using Notifliwy.Steps.Interfaces;
 
@@ -26,8 +25,6 @@ public class SectorBlock<TNotification, TEvent>(
     IServiceProvider serviceProvider,
     ILogger<SectorBlock<TNotification, TEvent>> sectorLogger,
     INotificationConditionProcessor<TNotification, TEvent> conditionProcessor) : ISectorBlock
-        where TNotification : INotification 
-        where TEvent : IEvent
 {
     /// <summary>
     /// Bound <see cref="INotificationExporter{TNotification}"/> instances
@@ -71,7 +68,7 @@ public class SectorBlock<TNotification, TEvent>(
 
         sectorLogger.LogDebug(
             message: "{input.event.hash} / {input.event} is allow, continue processing", 
-            inputEvent.GetHashCode(), DiagnosticEventData<TEvent>.EventSeparation);
+            inputEvent?.GetHashCode(), DiagnosticEventData<TEvent>.EventSeparation);
 
         var aggregatedNotification = await MapperSector.ConvertAsync(inputEvent, cancellationToken);
 

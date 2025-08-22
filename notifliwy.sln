@@ -24,8 +24,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "diagnostic", "diagnostic", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "deploy", "deploy", "{A150F95F-2BC3-4BAC-BAF5-448D1199E606}"
 	ProjectSection(SolutionItems) = preProject
-		deploy\docker-compose.yml = deploy\docker-compose.yml
-		deploy\kafka-compose.yml = deploy\kafka-compose.yml
+		deploy\sample-kafka-compose.yml = deploy\sample-kafka-compose.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{DAFC6AAB-4A48-4CDC-A0B9-57ECFB1F5FF8}"

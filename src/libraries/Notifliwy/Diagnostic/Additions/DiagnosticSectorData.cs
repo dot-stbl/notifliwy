@@ -1,14 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
-using Notifliwy.Extensions;
-using Notifliwy.Models.Interfaces;
 
 namespace Notifliwy.Diagnostic.Additions;
 
 // ReSharper disable once StaticMemberInGenericType
-internal class DiagnosticSectorData<TNotification, TEvent> 
-    where TNotification : INotification
-    where TEvent : IEvent
+internal class DiagnosticSectorData<TNotification, TEvent>
 {
     /// <summary>
     /// Current notification constant name for diagnostic

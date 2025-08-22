@@ -8,12 +8,12 @@
 
     <ItemGroup>
       <PackageReference Include="protobuf-net" Version="3.2.46" />
-      <PackageReference Include="MassTransit.Kafka" Version="8.4.0" />
+      <PackageReference Include="MassTransit.Kafka" Version="8.5.2" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\..\src\providers\Notifliwy.Provider.MassTransit.Kafka\Notifliwy.Provider.MassTransit.Kafka.csproj" />
       <ProjectReference Include="..\Notifliwy.Sample.Kafka\Notifliwy.Sample.Kafka.csproj" />
+      <ProjectReference Include="..\..\..\src\providers\Notifliwy.Provider.MassTransit.Kafka\Notifliwy.Provider.MassTransit.Kafka.csproj" />
     </ItemGroup>
 
 </Project>

@@ -9,7 +9,6 @@ using Notifliwy.Diagnostic;
 using Notifliwy.Diagnostic.Additions;
 using Notifliwy.Extensions;
 using Notifliwy.Extensions.Dependency;
-using Notifliwy.Models.Interfaces;
 
 namespace Notifliwy.Contexts;
 
@@ -19,9 +18,7 @@ namespace Notifliwy.Contexts;
 /// <inheritdoc />
 public class NotificationSector<TNotification, TEvent>(
     IServiceScopeFactory scopeFactory,
-    ILogger<NotificationSector<TNotification, TEvent>>? logger) : INotificationSector<TEvent> 
-        where TNotification : INotification
-        where TEvent : IEvent
+    ILogger<NotificationSector<TNotification, TEvent>>? logger) : INotificationSector<TEvent>
 {
     /// <inheritdoc />
     public async ValueTask PassThroughAsync(

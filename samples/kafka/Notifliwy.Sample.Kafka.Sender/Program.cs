@@ -12,6 +12,14 @@ builder.Services.AddMassTransit(configurator =>
         factoryConfigurator.ConfigureEndpoints(context);
     });
     
+    configurator.AddConfigureEndpointsCallback((_, endpointConfigurator) =>
+    {
+        endpointConfigurator.UseCircuitBreaker(configure: breakerConfigurator =>
+        {
+            breakerConfigurator.ResetInterval = TimeSpan.FromSeconds(5);
+        });
+    });
+    
     configurator.AddRider(configure: registrationConfigurator =>
     {
         registrationConfigurator.AddProducer<CatMeowEvent>(topicName: "meow.event");

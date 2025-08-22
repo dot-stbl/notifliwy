@@ -1,7 +1,6 @@
 using Notifliwy.Conditions.Interfaces;
 using Notifliwy.Dependency;
 using Notifliwy.Mapper.Interfaces;
-using Notifliwy.Models.Interfaces;
 using Notifliwy.Pipes.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,12 +24,12 @@ application.MapGet("/", () => "noy");
 
 application.Run();
 
-public class TestNotification : INotification
+public class TestNotification
 {
     public int MultiplyValue { get; set; }
 }
 
-public class TestEvent : IEvent
+public class TestEvent
 {
     public int InputValue { get; init; }
 }

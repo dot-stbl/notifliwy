@@ -6,7 +6,6 @@ using System.Threading;
 using Notifliwy.Connectors;
 using Notifliwy.Contexts.Interfaces;
 using Notifliwy.Diagnostic.Additions;
-using Notifliwy.Models.Interfaces;
 
 namespace Notifliwy.Extensions;
 
@@ -24,9 +23,7 @@ internal static class ActivityExtensions
     /// <summary>
     /// Create custom <see cref="Activity"/> special for <see cref="NotificationConnector{TEvent}"/>
     /// </summary>
-    public static Activity? StartConnectorActivity<TEvent>(
-        this ActivitySource activitySource)
-            where TEvent : IEvent
+    public static Activity? StartConnectorActivity<TEvent>(this ActivitySource activitySource)
     {
         return activitySource
             .StartActivity(DiagnosticEventData<TEvent>.ConnectorTraceName, ActivityKind.Server)
@@ -36,9 +33,7 @@ internal static class ActivityExtensions
     /// <summary>
     /// Create custom <see cref="Activity"/> special for <see cref="INotificationSector{TEvent}"/>
     /// </summary>
-    public static Activity? StartSectorActivity<TNotification, TEvent>(
-        this ActivitySource activitySource) 
-            where TNotification : INotification where TEvent : IEvent
+    public static Activity? StartSectorActivity<TNotification, TEvent>(this ActivitySource activitySource)
     {
         return activitySource
             .StartActivity(name: $"{DiagnosticSectorData<TNotification, TEvent>.TraceName}")
@@ -51,8 +46,6 @@ internal static class ActivityExtensions
     /// Add custom <c>notification</c> and <c>event</c> properties
     /// </summary>
     public static Activity? AddSectorTags<TNotification, TEvent>(this Activity? activity) 
-        where TNotification : INotification
-        where TEvent : IEvent
     {
         return activity
             ?.AddTag(

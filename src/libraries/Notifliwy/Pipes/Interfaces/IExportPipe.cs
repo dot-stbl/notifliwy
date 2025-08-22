@@ -1,6 +1,5 @@
 using System.Threading;
 using System.Threading.Tasks;
-using Notifliwy.Models.Interfaces;
 
 namespace Notifliwy.Pipes.Interfaces;
 
@@ -9,7 +8,6 @@ namespace Notifliwy.Pipes.Interfaces;
 /// </summary>
 /// <typeparam name="TEvent">exported event</typeparam>
 public interface IExportPipe<in TEvent>
-    where TEvent : IEvent
 {
     /// <summary>
     /// Export <typeparamref name="TEvent"/> to assigned <see cref="IExportPipe{TEvent}"/>

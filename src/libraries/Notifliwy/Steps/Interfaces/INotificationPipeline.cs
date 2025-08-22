@@ -3,15 +3,13 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Notifliwy.Extensions;
-using Notifliwy.Models.Interfaces;
 
 namespace Notifliwy.Steps.Interfaces;
 
 /// <summary>
 /// Assigned notification pipeline with <see cref="INotificationStep{TNotification}"/>'s
 /// </summary>
-public interface INotificationPipeline<TNotification> 
-    where TNotification : INotification
+public interface INotificationPipeline<TNotification>
 {
     /// <summary>
     /// Assigned steps
@@ -29,8 +27,7 @@ public interface INotificationPipeline<TNotification>
 /// <summary>
 /// Default <see cref="INotificationPipeline{TNotification}"/> executor service
 /// </summary>
-public class NotificationPipeline<TNotification> : INotificationPipeline<TNotification> 
-    where TNotification : INotification
+public class NotificationPipeline<TNotification> : INotificationPipeline<TNotification>
 {
     /// <summary>
     /// Compile default action by <paramref name="currentSteps"/>

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
-using Notifliwy.Models.Interfaces;
 
 namespace Notifliwy.Pipes.Interfaces;
 
@@ -9,7 +8,6 @@ namespace Notifliwy.Pipes.Interfaces;
 /// </summary>
 /// <typeparam name="TEvent">current assigned event type</typeparam>
 public interface IInputPipe<out TEvent>
-    where TEvent : IEvent
 {
     /// <summary>
     /// Get <typeparamref name="TEvent"/> imported from assigned <see cref="IExportPipe{TEvent}"/>

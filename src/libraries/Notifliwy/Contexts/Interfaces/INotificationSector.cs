@@ -1,13 +1,12 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using Notifliwy.Models.Interfaces;
 
 namespace Notifliwy.Contexts.Interfaces;
 
 /// <summary>
 /// Scoped <c>notification block</c>, contains assigned logic handler and <typeparamref name="TEvent"/> 
 /// </summary>
-public interface INotificationSector<in TEvent> where TEvent : IEvent
+public interface INotificationSector<in TEvent>
 {
     /// <summary>
     /// Compilable method for handling events and notifications resulting from their events

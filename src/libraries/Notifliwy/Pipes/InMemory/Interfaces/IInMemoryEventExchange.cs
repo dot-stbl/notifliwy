@@ -1,5 +1,4 @@
 using System.Threading.Channels;
-using Notifliwy.Models.Interfaces;
 using Notifliwy.Pipes.Interfaces;
 
 namespace Notifliwy.Pipes.InMemory.Interfaces;
@@ -9,7 +8,6 @@ namespace Notifliwy.Pipes.InMemory.Interfaces;
 /// </summary>
 /// <typeparam name="TEvent">handle event</typeparam>
 public interface IInMemoryEventExchange<TEvent>
-    where TEvent : IEvent
 {
     /// <summary>
     /// Event exchange by <see cref="IInputPipe{TEvent}"/> and <see cref="IExportPipe{TEvent}"/>

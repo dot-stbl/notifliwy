@@ -1,11 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using ProtoBuf;
-using Notifliwy.Models.Interfaces;
 
 namespace Notifliwy.Sample.Kafka;
 
 [ProtoContract]
-public class CatMeowNotification : INotification
+public class CatMeowNotification
 {
     [Key]
     [ProtoMember(tag: 3, IsRequired = true)]
@@ -19,7 +18,7 @@ public class CatMeowNotification : INotification
 }
 
 [ProtoContract]
-public class CatMeowEvent : IEvent
+public class CatMeowEvent
 {
     [ProtoMember(1, IsRequired = true)]
     public required string Name { get; init; }

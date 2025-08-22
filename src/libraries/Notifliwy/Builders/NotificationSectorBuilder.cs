@@ -11,7 +11,6 @@ using Notifliwy.Contexts.Interfaces;
 using Notifliwy.Exporters.Interfaces;
 using Notifliwy.Extensions;
 using Notifliwy.Mapper.Interfaces;
-using Notifliwy.Models.Interfaces;
 using Notifliwy.Steps.Interfaces;
 
 namespace Notifliwy.Builders;
@@ -20,8 +19,6 @@ namespace Notifliwy.Builders;
 /// Base <see cref="INotificationSectorBuilder"/>
 /// </summary>
 public class NotificationSectorBuilder<TNotification, TEvent>(IServiceCollection serviceCollection) : INotificationSectorBuilder
-        where TNotification : INotification
-        where TEvent : IEvent
 {
     /// <summary>
     /// Pending <see cref="INotificationCondition{TNotification,TEvent}"/> for addition to the final sector
@@ -106,7 +103,7 @@ public class NotificationSectorBuilder<TNotification, TEvent>(IServiceCollection
         serviceCollection.AddScoped(typeof(SectorBlock<TNotification, TEvent>));
         
         //as full generic
-        serviceCollection.AddScoped(
+        serviceCollection.AddTransient(
             serviceType: typeof(INotificationSector<TEvent>),
             implementationType: typeof(NotificationSector<TNotification, TEvent>));
     }

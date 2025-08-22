@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Notifliwy.Pipes.Interfaces;
-using Notifliwy.Models.Interfaces;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Notifliwy.Diagnostic;
@@ -14,13 +13,12 @@ using Notifliwy.Extensions.Dependency;
 namespace Notifliwy.Connectors;
 
 /// <summary>
-/// <typeparamref name="TEvent"/> connector to all assigned <see cref="INotification"/>
+/// <typeparamref name="TEvent"/> connector to all assigned <c>Notification</c>
 /// </summary>
 public class NotificationConnector<TEvent>(
     IInputPipe<TEvent> inputPipe,
     IServiceScopeFactory scopeFactory,
     ILogger<NotificationConnector<TEvent>> logger) : BackgroundService
-        where TEvent : IEvent
 {
     /// <inheritdoc />
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)

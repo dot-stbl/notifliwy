@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Notifliwy.Extensions;
-using Notifliwy.Models.Interfaces;
 
 namespace Notifliwy.Diagnostic.Additions;
 
@@ -34,7 +33,6 @@ internal class DiagnosticConstants
 
 // ReSharper disable once StaticMemberInGenericType
 internal class DiagnosticEventData<TEvent>
-    where TEvent : IEvent
 {
     /// <summary>
     /// Current event constant name for diagnostic

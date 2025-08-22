@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Notifliwy.Conditions.Interfaces;
-using Notifliwy.Models.Interfaces;
 
 namespace Notifliwy.Conditions;
 
@@ -12,8 +11,6 @@ namespace Notifliwy.Conditions;
 /// <inheritdoc />
 internal class NotificationConditionProcessor<TNotification, TEvent> 
     : INotificationConditionProcessor<TNotification, TEvent>
-        where TNotification : INotification
-        where TEvent : IEvent
 {
     /// <inheritdoc />
     public async ValueTask<bool> AllowConditionAsync(
