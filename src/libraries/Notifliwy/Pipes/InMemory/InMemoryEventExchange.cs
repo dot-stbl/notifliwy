@@ -34,24 +34,24 @@ public class InMemoryEventExchange<TEvent> : IInMemoryEventExchange<TEvent>
             switch (options.ChannelOptions)
             {
                 case null:
-                    {
-                        break;
-                    }
+                {
+                    break;
+                }
                 case BoundedChannelOptions boundedOptions:
-                    {
-                        EventExchange = Channel.CreateBounded<TEvent>(boundedOptions);
-                        return;
-                    }
+                {
+                    EventExchange = Channel.CreateBounded<TEvent>(boundedOptions);
+                    return;
+                }
                 case UnboundedChannelOptions unboundedOptions:
-                    {
-                        EventExchange = Channel.CreateUnbounded<TEvent>(unboundedOptions);
-                        return;
-                    }
+                {
+                    EventExchange = Channel.CreateUnbounded<TEvent>(unboundedOptions);
+                    return;
+                }
             }
         }
 
         var channelOptions = new BoundedChannelOptions(
-            capacity: InMemoryChannelConstants.DefaultChannelCapacity)
+            InMemoryChannelConstants.DefaultChannelCapacity)
         {
             FullMode = BoundedChannelFullMode.Wait
         };

@@ -30,9 +30,9 @@ public class NotificationConnector<TEvent>(
         };
 
         await using var connectorScope = scopeFactory.CreateAsyncScope()
-            .SectorBy<TEvent>(out var sectors);
+                .SectorBy<TEvent>(out var sectors);
 
-        logger.LogDebug(message: "Assigned sectors: {sector.count}", sectors.Length);
+        logger.LogDebug("Assigned sectors: {SectorСount}", sectors.Length);
 
         while (!cancellationToken.IsCancellationRequested)
         {
@@ -41,17 +41,25 @@ public class NotificationConnector<TEvent>(
                 using var activity = DiagnosticActivity.NotifliwySource.StartConnectorActivity<TEvent>();
 
                 await Parallel.ForEachAsync(
-                    source: sectors,
-                    parallelOptions: sharedParallelOptions,
-                    body: (sector, token) =>
+                    sectors,
+                    sharedParallelOptions,
+                    async (sector, token) =>
                     {
-                        _ = Task.Run(() => sector.PassThroughAsync(handledEvent, token), token);
-                        return ValueTask.CompletedTask;
+                        try
+                        {
+                            await sector.PassThroughAsync(handledEvent, token);
+                        }
+                        catch (Exception ex)
+                        {
+                            logger.LogError(ex, "Error in sector {SectorType} processing event {EventType}",
+                                typeof(TEvent), sector.GetType().Name);
+                            throw;
+                        }
                     });
 
-                activity.AddMeter(metricAction: () =>
+                activity.AddMeter(() =>
                 {
-                    DiagnosticMeter.InputCounter.Add(delta: 1, tagList: DiagnosticEventData<TEvent>.TagsBy);
+                    DiagnosticMeter.InputCounter.Add(1, DiagnosticEventData<TEvent>.TagsBy);
                 });
             }
         }

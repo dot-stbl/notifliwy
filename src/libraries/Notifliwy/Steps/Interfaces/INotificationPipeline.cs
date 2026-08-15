@@ -43,12 +43,11 @@ public class NotificationPipeline<TNotification> : INotificationPipeline<TNotifi
         }
         else
         {
-            CompiledPipeline = async (notification, token) =>
-            {
-                return await CurrentSteps.AggregateAsync(notification,
-                    func: async (aggregateNotification, step) =>
-                        await step.AggregateAsync(aggregateNotification, token));
-            };
+            CompiledPipeline = (notification, token) =>
+                CurrentSteps.AggregateAsync(
+                    notification,
+                    (aggregateNotification, step) =>
+                        step.AggregateAsync(aggregateNotification, token));
         }
     }
 

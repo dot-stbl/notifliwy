@@ -46,7 +46,7 @@ public class NotificationServerBuilder(IServiceCollection serviceCollection)
             AssignedNotifications.AddBindings<TNotification, TEvent>();
         }
 
-        ConnectorsBuilders.Add(item: new ConnectorsBuilder<TEvent>());
+        ConnectorsBuilders.Add(new ConnectorsBuilder<TEvent>());
 
         return this;
     }

@@ -15,8 +15,8 @@ internal static class AssignedTypeCompiler
 
         bindingType.AddOrUpdate(
             typeTuple.EventType,
-            addValueFactory: _ => [typeTuple.NotificationType],
-            updateValueFactory: (_, existList) =>
+            _ => [typeTuple.NotificationType],
+            (_, existList) =>
             {
                 existList.Add(typeTuple.NotificationType);
                 return existList;

@@ -12,16 +12,15 @@ internal static class StringExtensions
     private static readonly char[] Delimiters = [' ', '-', '_', '.'];
 
     private static string SymbolsPipe(
-        string source,
+        string src,
         char mainDelimiter,
-        Func<char, bool, char[]> newWordSymbolHandler)
+        Func<char, bool, char[]> handler)
     {
         var builder = new StringBuilder();
-
         var disableFrontDelimiter = true;
         var nextSymbolStartsNewWord = true;
 
-        foreach (var symbol in source)
+        foreach (var symbol in src)
         {
             if (Delimiters.Contains(symbol))
             {
@@ -43,7 +42,7 @@ internal static class StringExtensions
             {
                 if (nextSymbolStartsNewWord || char.IsUpper(symbol))
                 {
-                    builder.Append(newWordSymbolHandler(symbol, disableFrontDelimiter));
+                    builder.Append(handler(symbol, disableFrontDelimiter));
                     disableFrontDelimiter = false;
                     nextSymbolStartsNewWord = false;
                 }
@@ -57,12 +56,6 @@ internal static class StringExtensions
         return builder.ToString();
     }
 
-    /// <summary>
-    /// Convert <paramref name="source"/> to <c>DotCase</c>
-    /// </summary>
-    /// <example>example.word</example>
-    /// <param name="source">compute string</param>
-    /// <exception cref="ArgumentNullException">if null</exception>
     public static string ToDotCase(this string source)
     {
         if (source == null)
@@ -70,9 +63,9 @@ internal static class StringExtensions
 
         return SymbolsPipe(
             source,
-            mainDelimiter: '.',
-            newWordSymbolHandler: (s, disableFrontDelimiter)
-                => disableFrontDelimiter ? [char.ToLowerInvariant(s)] : ['.', char.ToLowerInvariant(s)]);
+            '.',
+            (s, disableFrontDelimiter)
+                    => disableFrontDelimiter ? [char.ToLowerInvariant(s)] : ['.', char.ToLowerInvariant(s)]);
     }
 
     /// <summary>
@@ -88,9 +81,9 @@ internal static class StringExtensions
 
         return SymbolsPipe(
             source,
-            mainDelimiter: '\0',
-            newWordSymbolHandler: (s, disableFrontDelimiter)
-                => disableFrontDelimiter ? [char.ToLowerInvariant(s)] : [char.ToUpperInvariant(s)]);
+            '\0',
+            (s, disableFrontDelimiter)
+                    => disableFrontDelimiter ? [char.ToLowerInvariant(s)] : [char.ToUpperInvariant(s)]);
     }
 
     /// <summary>
@@ -106,9 +99,9 @@ internal static class StringExtensions
 
         return SymbolsPipe(
             source,
-            mainDelimiter: '-',
-            newWordSymbolHandler: (s, disableFrontDelimiter)
-                => disableFrontDelimiter ? [char.ToLowerInvariant(s)] : ['-', char.ToLowerInvariant(s)]);
+            '-',
+            (s, disableFrontDelimiter)
+                    => disableFrontDelimiter ? [char.ToLowerInvariant(s)] : ['-', char.ToLowerInvariant(s)]);
     }
 
     /// <summary>
@@ -124,9 +117,9 @@ internal static class StringExtensions
 
         return SymbolsPipe(
             source,
-            mainDelimiter: '_',
-            newWordSymbolHandler: (s, disableFrontDelimiter)
-                => disableFrontDelimiter ? [char.ToLowerInvariant(s)] : ['_', char.ToLowerInvariant(s)]);
+            '_',
+            (s, disableFrontDelimiter)
+                    => disableFrontDelimiter ? [char.ToLowerInvariant(s)] : ['_', char.ToLowerInvariant(s)]);
     }
 
     /// <summary>
@@ -142,8 +135,8 @@ internal static class StringExtensions
 
         return SymbolsPipe(
             source,
-            mainDelimiter: '\0',
-            newWordSymbolHandler: (s, _) => [char.ToUpperInvariant(s)]);
+            '\0',
+            (s, _) => [char.ToUpperInvariant(s)]);
     }
 
     /// <summary>
@@ -159,8 +152,8 @@ internal static class StringExtensions
 
         return SymbolsPipe(
             source,
-            mainDelimiter: '-',
-            newWordSymbolHandler: (s, disableFrontDelimiter)
-                => disableFrontDelimiter ? [char.ToUpperInvariant(s)] : ['-', char.ToUpperInvariant(s)]);
+            '-',
+            (s, disableFrontDelimiter)
+                    => disableFrontDelimiter ? [char.ToUpperInvariant(s)] : ['-', char.ToUpperInvariant(s)]);
     }
 }

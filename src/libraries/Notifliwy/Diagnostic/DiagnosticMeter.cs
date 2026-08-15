@@ -4,31 +4,27 @@ using Notifliwy.Contexts.Interfaces;
 
 namespace Notifliwy.Diagnostic;
 
-internal class DiagnosticMeter
+internal static class DiagnosticMeter
 {
     /// <summary>
     /// Global <see cref="Notifliwy"/> <see cref="Meter"/>
     /// </summary>
-    public static readonly Meter NotifliwyServerMeter = CreateInstanceServerMeter(Assembly.GetExecutingAssembly());
+    public static readonly Meter NotifliwyServerMeter = CreateMeter(Assembly.GetExecutingAssembly());
 
     /// <summary>
     /// Event counter metric
     /// </summary>
     public static Counter<long> InputCounter { get; } = NotifliwyServerMeter.CreateCounter<long>(
-        name: "notifliwy.server.event.count",
+        "notifliwy.server.event.count",
         description: "Number of events accepted");
 
     /// <summary>
     /// Event <see cref="INotificationSector{TEvent}"/> counter
     /// </summary>
     public static Counter<long> SectorProcessingCounter { get; } = NotifliwyServerMeter.CreateCounter<long>(
-        name: "notifliwy.server.sector.count",
+        "notifliwy.server.sector.count",
         description: "Number of events with final notification processing");
 
-    private static Meter CreateInstanceServerMeter(Assembly assembly)
-    {
-        return new Meter(
-            name: $"{nameof(Notifliwy)}.Server",
-            version: $"{assembly.GetName().Version}");
-    }
+    private static Meter CreateMeter(Assembly assembly) =>
+        new($"{nameof(Notifliwy)}.Server", $"{assembly.GetName().Version}");
 }

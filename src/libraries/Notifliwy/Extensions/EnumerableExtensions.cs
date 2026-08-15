@@ -13,10 +13,10 @@ internal static class EnumerableExtensions
     /// <summary>
     /// Asynchronously aggregates sequence elements by applying an asynchronous accumulator function.
     /// </summary>
-    public static async ValueTask<TAccumulate> AggregateAsync<TSource, TAccumulate>(
+    public async static ValueTask<TAccumulate> AggregateAsync<TSource, TAccumulate>(
         this IEnumerable<TSource> source,
         TAccumulate seed,
-        Func<TAccumulate, TSource, Task<TAccumulate>> func)
+        Func<TAccumulate, TSource, ValueTask<TAccumulate>> func)
     {
         var accumulator = seed;
 

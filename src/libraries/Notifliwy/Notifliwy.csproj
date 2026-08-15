@@ -13,47 +13,47 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <InternalsVisibleTo Include="Notifliwy.Units" /> 
-        <InternalsVisibleTo Include="Notifliwy.Benchmark" /> 
-    </ItemGroup>
-    
-    <ItemGroup>
-        <InternalsVisibleTo Include="Notifliwy.Hosting" />
-        <InternalsVisibleTo Include="Notifliwy.OpenTelemetry.Instrumentation" />
+        <InternalsVisibleTo Include="Notifliwy.Units"/>
+        <InternalsVisibleTo Include="Notifliwy.Benchmark"/>
     </ItemGroup>
 
     <ItemGroup>
-        <InternalsVisibleTo Include="Notifliwy.Provider.MassTransit.Kafka" />
+        <InternalsVisibleTo Include="Notifliwy.Hosting"/>
+        <InternalsVisibleTo Include="Notifliwy.OpenTelemetry.Instrumentation"/>
     </ItemGroup>
 
     <ItemGroup>
-        <InternalsVisibleTo Include="Notifliwy.Sample.Kafka.Server" />
+        <InternalsVisibleTo Include="Notifliwy.Provider.MassTransit.Kafka"/>
     </ItemGroup>
-    
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="Notifliwy.Sample.Kafka.Server"/>
+    </ItemGroup>
+
     <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
-      <PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0"/>
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
-        <PackageReference Include="Microsoft.Extensions.Options" Version="7.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="7.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Options" Version="7.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="7.0.0"/>
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
-        <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0"/>
     </ItemGroup>
 
     <ItemGroup>
-      <None Include="..\..\..\contents\icon.main.png">
-        <Pack>True</Pack>
-        <PackagePath/>
-        <Link>icon.main.png</Link>
-      </None>
+        <None Include="..\..\..\contents\icon.main.png">
+            <Pack>True</Pack>
+            <PackagePath/>
+            <Link>icon.main.png</Link>
+        </None>
     </ItemGroup>
 
     <PropertyGroup>
@@ -71,11 +71,11 @@
     <PropertyGroup>
         <Description>.NET library for distributed handler and pipeline for notifications</Description>
     </PropertyGroup>
-    
+
     <PropertyGroup>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
     </PropertyGroup>
-    
+
     <ItemGroup>
         <Content Include="..\..\..\README.md">
             <Link>README.md</Link>
@@ -83,9 +83,14 @@
             <PackagePath/>
         </Content>
     </ItemGroup>
-    
+
+    <ItemGroup>
+        <Folder Include="Exporters\Interfaces\Options\"/>
+        <Folder Include="Options\"/>
+    </ItemGroup>
+
     <PropertyGroup>
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
-    
+
 </Project>

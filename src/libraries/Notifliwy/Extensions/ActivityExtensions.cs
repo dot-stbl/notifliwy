@@ -26,8 +26,8 @@ internal static class ActivityExtensions
     public static Activity? StartConnectorActivity<TEvent>(this ActivitySource activitySource)
     {
         return activitySource
-            .StartActivity(DiagnosticEventData<TEvent>.ConnectorTraceName, ActivityKind.Server)
-            ?.AddTag(key: DiagnosticConstants.PropertyNames.EventType, DiagnosticEventData<TEvent>.EventSeparation);
+                .StartActivity(DiagnosticEventData<TEvent>.ConnectorTraceName, ActivityKind.Server)
+                ?.AddTag(DiagnosticConstants.PropertyNames.EventType, DiagnosticEventData<TEvent>.EventSeparation);
     }
 
     /// <summary>
@@ -36,8 +36,8 @@ internal static class ActivityExtensions
     public static Activity? StartSectorActivity<TNotification, TEvent>(this ActivitySource activitySource)
     {
         return activitySource
-            .StartActivity(name: $"{DiagnosticSectorData<TNotification, TEvent>.TraceName}")
-            .AddSectorTags<TNotification, TEvent>();
+                .StartActivity($"{DiagnosticSectorData<TNotification, TEvent>.TraceName}")
+                .AddSectorTags<TNotification, TEvent>();
     }
 
     #region Tag extensions
@@ -48,12 +48,12 @@ internal static class ActivityExtensions
     public static Activity? AddSectorTags<TNotification, TEvent>(this Activity? activity)
     {
         return activity
-            ?.AddTag(
-                key: DiagnosticConstants.PropertyNames.EventType,
-                value: DiagnosticSectorData<TNotification, TEvent>.EventSeparation)
-            .AddTag(
-                key: DiagnosticConstants.PropertyNames.NotificationType,
-                value: DiagnosticSectorData<TNotification, TEvent>.NotificationSeparation);
+                ?.AddTag(
+                    DiagnosticConstants.PropertyNames.EventType,
+                    DiagnosticSectorData<TNotification, TEvent>.EventSeparation)
+                .AddTag(
+                    DiagnosticConstants.PropertyNames.NotificationType,
+                    DiagnosticSectorData<TNotification, TEvent>.NotificationSeparation);
     }
 
     #endregion
@@ -71,7 +71,7 @@ internal static class ActivityExtensions
         var tagsCollection = new ActivityTagsCollection
         {
             { SemanticConventions.AttributeExceptionType, exception.GetType().FullName },
-            { SemanticConventions.AttributeExceptionStacktrace, exception.ToInvariantString() },
+            { SemanticConventions.AttributeExceptionStacktrace, exception.ToInvariantString() }
         };
 
         if (!string.IsNullOrWhiteSpace(exception.Message))
@@ -81,8 +81,8 @@ internal static class ActivityExtensions
 
         activity?.AddEvent(
             new ActivityEvent(SemanticConventions.AttributeExceptionEventName,
-            timestamp: default,
-            tagsCollection));
+                default,
+                tagsCollection));
     }
 
     #endregion

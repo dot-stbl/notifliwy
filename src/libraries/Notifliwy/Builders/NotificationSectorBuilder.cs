@@ -30,9 +30,9 @@ public class NotificationSectorBuilder<TNotification, TEvent>(IServiceCollection
     /// </summary>
     /// <typeparam name="TCondition">custom condition handler</typeparam>
     public NotificationSectorBuilder<TNotification, TEvent> AddCondition<TCondition>()
-        where TCondition : class, INotificationCondition<TNotification, TEvent>
+            where TCondition : class, INotificationCondition<TNotification, TEvent>
     {
-        PendingConditions.Add(item: typeof(TCondition));
+        PendingConditions.Add(typeof(TCondition));
         return this;
     }
 
@@ -41,7 +41,7 @@ public class NotificationSectorBuilder<TNotification, TEvent>(IServiceCollection
     /// </summary>
     /// <typeparam name="TMapper">custom mapper for <c>event</c> to <c>notification</c></typeparam>
     public NotificationSectorBuilder<TNotification, TEvent> AddMapper<TMapper>()
-        where TMapper : class, INotificationMapper<TNotification, TEvent>
+            where TMapper : class, INotificationMapper<TNotification, TEvent>
     {
         serviceCollection.AddScoped<INotificationMapper<TNotification, TEvent>, TMapper>();
         return this;
@@ -51,11 +51,11 @@ public class NotificationSectorBuilder<TNotification, TEvent>(IServiceCollection
     /// Add <see cref="INotificationExporter{TNotification}"/>
     /// </summary>
     public NotificationSectorBuilder<TNotification, TEvent> AddExporter<TExporter>()
-        where TExporter : INotificationExporter<TNotification>
+            where TExporter : INotificationExporter<TNotification>
     {
         serviceCollection.AddScoped(
-            serviceType: typeof(INotificationExporter<TNotification>),
-            implementationType: typeof(TExporter));
+            typeof(INotificationExporter<TNotification>),
+            typeof(TExporter));
 
         return this;
     }
@@ -72,8 +72,8 @@ public class NotificationSectorBuilder<TNotification, TEvent>(IServiceCollection
         Action<PipelineBuilder<TNotification>> pipelineBuilder)
     {
         StagesBuilders.AddAction(
-            source: new PipelineBuilder<TNotification>(),
-            actionAfter: pipelineBuilder.Invoke);
+            new PipelineBuilder<TNotification>(),
+            pipelineBuilder.Invoke);
 
         return this;
     }
@@ -104,7 +104,7 @@ public class NotificationSectorBuilder<TNotification, TEvent>(IServiceCollection
 
         //as full generic
         serviceCollection.AddTransient(
-            serviceType: typeof(INotificationSector<TEvent>),
-            implementationType: typeof(NotificationSector<TNotification, TEvent>));
+            typeof(INotificationSector<TEvent>),
+            typeof(NotificationSector<TNotification, TEvent>));
     }
 }

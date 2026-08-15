@@ -13,6 +13,6 @@ public static class RandomExtensions
     internal static TEnum? NextEnum<TEnum>()
     {
         var enumArray = Enum.GetValues(typeof(TEnum));
-        return (TEnum?)enumArray.GetValue(index: Random.Shared.Next(enumArray.Length));
+        return (TEnum?)enumArray.GetValue(Random.Shared.Next(enumArray.Length));
     }
 }

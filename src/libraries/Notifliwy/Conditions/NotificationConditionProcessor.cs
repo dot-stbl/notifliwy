@@ -10,7 +10,7 @@ namespace Notifliwy.Conditions;
 /// </summary>
 /// <inheritdoc />
 internal class NotificationConditionProcessor<TNotification, TEvent>
-    : INotificationConditionProcessor<TNotification, TEvent>
+        : INotificationConditionProcessor<TNotification, TEvent>
 {
     /// <inheritdoc />
     public async ValueTask<bool> AllowConditionAsync(

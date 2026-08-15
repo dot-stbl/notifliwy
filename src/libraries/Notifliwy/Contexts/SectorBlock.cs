@@ -58,25 +58,25 @@ public class SectorBlock<TNotification, TEvent>(
         CancellationToken cancellationToken = default)
     {
         if (!await ConditionInstances.CheckoutInstanceAsync(
-                singleAction: async condition
-                    => await conditionProcessor.AllowConditionAsync(inputEvent, condition, cancellationToken),
-                multiplyAction: async conditions
-                    => await conditionProcessor.AllowConditionsAsync(inputEvent, conditions, cancellationToken)))
+                async condition
+                        => await conditionProcessor.AllowConditionAsync(inputEvent, condition, cancellationToken),
+                async conditions
+                        => await conditionProcessor.AllowConditionsAsync(inputEvent, conditions, cancellationToken)))
         {
             return;
         }
 
-        sectorLogger.LogDebug(
-            message: "{input.event.hash} / {input.event} is allow, continue processing",
-            inputEvent?.GetHashCode(), DiagnosticEventData<TEvent>.EventSeparation);
+        sectorLogger.LogDebug("InputEventHash: {InputEventHash} / InputEvent: {InputEvent} is allow, continue processing",
+            inputEvent?.GetHashCode(),
+            DiagnosticEventData<TEvent>.EventSeparation);
 
         var aggregatedNotification = await MapperSector.ConvertAsync(inputEvent, cancellationToken);
 
         if (PipelineInstances.UseInstance)
         {
             aggregatedNotification = await PipelineInstances.CheckoutInstanceAsync(
-                singleAction: async pipeline => await pipeline.InvokePipeline(aggregatedNotification, cancellationToken),
-                multiplyAction: async pipelines =>
+                async pipeline => await pipeline.InvokePipeline(aggregatedNotification, cancellationToken),
+                async pipelines =>
                 {
                     foreach (var pipeline in pipelines)
                     {
@@ -87,15 +87,11 @@ public class SectorBlock<TNotification, TEvent>(
                 });
         }
 
-        if (!ExporterInstances.UseInstance)
-        {
-            sectorLogger.LogInformation(JsonSerializer.Serialize(aggregatedNotification));
-        }
-        else
+        if (ExporterInstances.UseInstance)
         {
             await ExporterInstances.CheckoutInstanceAsync(
-                singleAction: exporter => exporter.ThrowAsync(aggregatedNotification, cancellationToken),
-                multiplyAction: async exporters =>
+                exporter => exporter.ThrowAsync(aggregatedNotification, cancellationToken),
+                async exporters =>
                 {
                     foreach (var exporter in exporters)
                     {

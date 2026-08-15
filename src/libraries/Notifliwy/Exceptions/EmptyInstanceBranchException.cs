@@ -7,4 +7,4 @@ namespace Notifliwy.Exceptions;
 /// Is <see cref="MultiplyServiceInstance{TInstance}"/> have zero instance count
 /// </summary>
 public class EmptyInstanceBranchException(Type instanceType)
-    : InvalidOperationException(message: $"Multiply container have 0 instances of {instanceType}");
+        : InvalidOperationException($"Multiply container have 0 instances of {instanceType}");

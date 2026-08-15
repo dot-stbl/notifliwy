@@ -22,6 +22,6 @@ public class DiagnosticActivity
     /// Main <see cref="ActivitySource"/> for <see cref="Notifliwy"/>
     /// </summary>
     internal static ActivitySource NotifliwySource { get; } = new(
-        name: InstrumentName,
-        version: $"{ThisAssembly.GetName().Version}");
+        InstrumentName,
+        $"{ThisAssembly.GetName().Version}");
 }

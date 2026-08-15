@@ -37,7 +37,7 @@ public class MultiplyServiceInstance<TInstance>
     /// <summary>
     /// Are there any services in this block at all
     /// </summary>
-    public bool UseInstance => Single != null || Multiply?.Length != 0;
+    public bool UseInstance => Single != null || Multiply?.Length > 0;
 
     /// <summary>
     /// It gets the required type of instances from <paramref name="serviceProvider"/> and fills the block itself
@@ -46,8 +46,8 @@ public class MultiplyServiceInstance<TInstance>
     public MultiplyServiceInstance(IServiceProvider serviceProvider)
     {
         var instances = serviceProvider
-            .GetServices<TInstance>()
-            .ToArray();
+                .GetServices<TInstance>()
+                .ToArray();
 
         if (instances.Length == 1 && instances.FirstOrDefault() is { } instance)
         {
@@ -126,6 +126,7 @@ public class MultiplyServiceInstance<TInstance>
         if (IsSingle && Single != null)
         {
             await singleAction(Single);
+            return;
         }
 
         await multiplyAction(Multiply!);

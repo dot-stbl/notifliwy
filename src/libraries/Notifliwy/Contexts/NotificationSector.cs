@@ -30,7 +30,7 @@ public class NotificationSector<TNotification, TEvent>(
         try
         {
             await using var scope = scopeFactory.CreateAsyncScope()
-                .BlockBy<TNotification, TEvent>(out var sectorBlock);
+                    .BlockBy<TNotification, TEvent>(out var sectorBlock);
 
             await sectorBlock.ProcessingAsync(inputEvent, cancellationToken);
         }
@@ -49,8 +49,8 @@ public class NotificationSector<TNotification, TEvent>(
             activity.AddMeter(() =>
             {
                 DiagnosticMeter.SectorProcessingCounter.Add(
-                    delta: 1,
-                    tagList: DiagnosticSectorData<TNotification, TEvent>.TagsBy);
+                    1,
+                    DiagnosticSectorData<TNotification, TEvent>.TagsBy);
             });
         }
     }

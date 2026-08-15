@@ -7,4 +7,4 @@ namespace Notifliwy.Exceptions;
 /// Exception failed build <see cref="SectorBlock{TNotification,TEvent}"/>
 /// </summary>
 public class SectorMinimalRequiredException(string typeRequired)
-    : Exception(message: $"Required service {typeRequired} is not registered");
+        : Exception($"Required service {typeRequired} is not registered");

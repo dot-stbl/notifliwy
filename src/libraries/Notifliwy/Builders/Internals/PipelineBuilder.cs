@@ -21,9 +21,9 @@ public class PipelineBuilder<TNotification> : IStagesBuilder
     /// Add <typeparamref name="TStep"/> to stages of processing <c>notification</c>
     /// </summary>
     public PipelineBuilder<TNotification> AddStep<TStep>()
-        where TStep : INotificationStep<TNotification>
+            where TStep : INotificationStep<TNotification>
     {
-        LinkedSteps.Add(item: typeof(TStep));
+        LinkedSteps.Add(typeof(TStep));
         return this;
     }
 
@@ -43,13 +43,13 @@ public class PipelineBuilder<TNotification> : IStagesBuilder
         }
 
         serviceCollection.AddScoped(
-            serviceType: typeof(INotificationPipeline<TNotification>),
-            implementationFactory: provider =>
+            typeof(INotificationPipeline<TNotification>),
+            provider =>
             {
                 var assignedSteps = stepTypes
-                    .Select(provider.GetRequiredService)
-                    .Cast<INotificationStep<TNotification>>()
-                    .ToArray();
+                        .Select(provider.GetRequiredService)
+                        .Cast<INotificationStep<TNotification>>()
+                        .ToArray();
 
                 return new NotificationPipeline<TNotification>(assignedSteps);
             });
