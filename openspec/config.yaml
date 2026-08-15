@@ -1,0 +1,75 @@
+schema: spec-driven
+
+context: |
+  Project: Notifliwy — .NET library for pipeline-based event → notification processing.
+  Repo: https://github.com/dot-stbl/notifliwy
+  License: GPL-3.0-or-later
+
+  Packages (NuGet):
+    - Notifliwy (core, multi-target net6.0;net7.0;net8.0)
+    - Notifliwy.Provider.MassTransit.Kafka
+    - Notifliwy.OpenTelemetry.Instrumentation
+    - Synaptix.MassTransit.Kafka.Protobuf (netstandard2.1)
+
+  Pipeline (as designed):
+    event → IInputPipe.AcceptAsync → NotificationConnector (BackgroundService)
+      → sectors in parallel (Parallel.ForEachAsync)
+        → DI scope per event → SectorBlock:
+          condition(s) → mapper (required) → pipeline steps → exporter(s)
+
+  Processing model:
+    - Sectors for the same TEvent run in parallel; each has its own scope.
+    - Pipelines registered via WithPipeline currently CHAIN (each sees previous result).
+      Sample comments claim independence — tracked as GH #9 (design decision open).
+    - Empty condition set currently THROWS EmptyInstanceBranchException (GH #7);
+      docs claim "optional". Prefer documenting intended "allow if none" in change specs.
+
+  Key types:
+    INotificationCondition<TNotification, TEvent>  AllowItAsync → ValueTask<bool>
+    INotificationMapper<TNotification, TEvent>     ConvertAsync → ValueTask<TNotification>
+    INotificationStep<TNotification>               AggregateAsync → ValueTask<TNotification>
+    INotificationExporter<TNotification>           ThrowAsync → ValueTask
+    IInputPipe / IExportPipe
+
+  DI entry: AddNotifliwyServer(server => { … AddNotification / AddInMemoryInput })
+
+  Tests: xUnit + Moq + Shouldly under test/Notifliwy.Units
+  Build: dotnet build notifliwy.sln
+  Samples: samples/inmemory, samples/kafka (compose: deploy/sample-kafka-compose.yml)
+
+  Commit format (repo history): [stbl](<area>): <subject>
+  Open issues live on GitHub (dot-stbl/notifliwy). Prefer one OpenSpec change per issue
+  or tightly coupled issue pair.
+
+  Docs of record (may drift — GH #13): README.md, docs/NOTIFLIWY.md, docs/BUGS.md, CLAUDE.md
+
+  Agent policy: prefer worktrees for feature work; no long-lived dev/watch servers;
+  do not invent NuGet publish or version bumps without explicit ask.
+
+rules:
+  proposal:
+    - Keep proposals under ~500 words
+    - Always include Non-goals
+    - Link related GitHub issue number(s) in the first paragraph
+    - Call out whether behaviour is a bugfix (docs already correct) or a design choice
+  specs:
+    - Requirements describe observable behaviour, not file paths
+    - Use SHALL/MUST for normative; MAY for optional
+    - Scenarios are Given/When/Then style with WHEN/THEN bullets
+    - Document known broken behaviour only inside a change delta, not in main specs once fixed
+  design:
+    - Prefer minimal API surface change; multi-target net6/7/8 must keep compiling
+    - Note ValueTask vs Task consistency with the rest of the library
+  tasks:
+    - Chunks estimable in under ~2 hours
+    - Each task checkable (build/test or explicit manual verify)
+    - Include a task to update docs if the change invalidates README / NOTIFLIWY / CLAUDE
+
+operations:
+  apply:
+    guidance:
+      - Run dotnet build notifliwy.sln and relevant unit tests before marking tasks done
+      - Do not push or open PRs unless the orchestrator / user asked
+  archive:
+    guidance:
+      - Summarize archive outcome; close or comment on the linked GitHub issue
