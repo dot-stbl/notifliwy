@@ -27,6 +27,6 @@ public class ProtobufMassTransitSerializer<T> : ISerializer<T>, IAsyncSerializer
     /// <inheritdoc />
     public async Task<byte[]> SerializeAsync(T data, SerializationContext context)
     {
-        return await Task.Run(function: () => Serialize(data, context));
+        return await Task.Run(() => Serialize(data, context));
     }
 }

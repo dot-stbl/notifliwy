@@ -17,10 +17,16 @@ public class ProtobufKafkaSerializerFactory : IKafkaSerializerFactory
     /// <summary>
     /// Assigned <see cref="Confluent.Kafka.IDeserializer{T}"/>
     /// </summary>
-    public IDeserializer<T> GetDeserializer<T>() => new ProtobufMassTransitDeserializer<T>();
+    public IDeserializer<T> GetDeserializer<T>()
+    {
+        return new ProtobufMassTransitDeserializer<T>();
+    }
 
     /// <summary>
     /// Assigned <see cref="IAsyncSerializer{T}"/>, <see cref="ISerializer{T}"/>
     /// </summary>
-    public IAsyncSerializer<T> GetSerializer<T>() => new ProtobufMassTransitSerializer<T>();
+    public IAsyncSerializer<T> GetSerializer<T>()
+    {
+        return new ProtobufMassTransitSerializer<T>();
+    }
 }

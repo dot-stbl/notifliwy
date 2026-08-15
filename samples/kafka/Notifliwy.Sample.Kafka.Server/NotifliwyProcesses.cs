@@ -106,7 +106,7 @@ public class CatNotificationDatabaseExporter(TempDbContext dbContext) : INotific
         CancellationToken cancellationToken = default)
     {
         await dbContext.Notifications.AddAsync(
-            entity: notification,
+            notification,
             cancellationToken);
 
         await dbContext.SaveChangesAsync(cancellationToken);

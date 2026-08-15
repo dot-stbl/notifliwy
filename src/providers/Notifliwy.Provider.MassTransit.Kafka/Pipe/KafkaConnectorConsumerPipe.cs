@@ -8,7 +8,7 @@ namespace Notifliwy.Provider.MassTransit.Kafka.Pipe;
 /// </summary>
 /// <typeparam name="TEvent">assigned class event type</typeparam>
 public class KafkaConnectorConsumerPipe<TEvent>(IExportPipe<TEvent> exportPipe) : IConsumer<TEvent>
-    where TEvent : class
+        where TEvent : class
 {
     /// <inheritdoc />
     public async Task Consume(ConsumeContext<TEvent> context)

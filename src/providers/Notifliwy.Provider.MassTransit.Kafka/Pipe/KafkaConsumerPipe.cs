@@ -9,14 +9,14 @@ namespace Notifliwy.Provider.MassTransit.Kafka.Pipe;
 /// </summary>
 /// <typeparam name="TEvent">assigned class event type</typeparam>
 public class KafkaConsumerPipe<TEvent>(IEnumerable<INotificationSector<TEvent>> notificationSectors) : IConsumer<TEvent>
-    where TEvent : class
+        where TEvent : class
 {
     /// <inheritdoc />
     public async Task Consume(ConsumeContext<TEvent> context)
     {
         await Parallel.ForEachAsync(
-            source: notificationSectors,
-            body: async (sector, cancellationToken) =>
+            notificationSectors,
+            async (sector, cancellationToken) =>
             {
                 await sector.PassThroughAsync(context.Message, cancellationToken);
             });

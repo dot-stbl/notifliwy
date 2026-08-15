@@ -18,7 +18,7 @@ public class ProtobufMassTransitDeserializer<T> : IDeserializer<T>
         if (data.IsEmpty && isNull)
             return default!;
 
-        using var stream = new MemoryStream(buffer: data.ToArray());
+        using var stream = new MemoryStream(data.ToArray());
         return Serializer.DeserializeWithLengthPrefix<T>(stream, PrefixStyle.Fixed32);
     }
 }

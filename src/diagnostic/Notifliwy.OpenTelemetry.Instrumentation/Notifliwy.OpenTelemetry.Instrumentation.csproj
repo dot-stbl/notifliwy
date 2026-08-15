@@ -7,11 +7,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\libraries\Notifliwy\Notifliwy.csproj" />
+        <ProjectReference Include="..\..\libraries\Notifliwy\Notifliwy.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="OpenTelemetry.Api.ProviderBuilderExtensions" Version="1.4.*-*" />
+        <PackageReference Include="OpenTelemetry.Api.ProviderBuilderExtensions" Version="1.15.3" />
     </ItemGroup>
 
     <PropertyGroup>
@@ -19,7 +19,7 @@
         <FileVersion>$(Version)</FileVersion>
         <AssemblyVersion>$(Version)</AssemblyVersion>
     </PropertyGroup>
-    
+
     <PropertyGroup>
         <Authors>stbl</Authors>
         <RepositoryType>git</RepositoryType>
@@ -29,13 +29,13 @@
         <Description>OpenTelemetry diagnostic instrument extensions</Description>
         <PackageTags>notifliwy, trace, meter, metric, opentelemetry, otlp, instrument, provider</PackageTags>
     </PropertyGroup>
-    
+
     <ItemGroup>
-      <None Include="..\..\..\contents\otlp.icon.main.png">
-        <Pack>True</Pack>
-        <PackagePath/>
-        <Link>otlp.icon.main.png</Link>
-      </None>
+        <None Include="..\..\..\contents\otlp.icon.main.png">
+            <Pack>True</Pack>
+            <PackagePath/>
+            <Link>otlp.icon.main.png</Link>
+        </None>
     </ItemGroup>
 
     <PropertyGroup>
@@ -46,7 +46,7 @@
     <PropertyGroup>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
     </PropertyGroup>
-    
+
     <ItemGroup>
         <Content Include="..\..\..\README.md">
             <Link>README.md</Link>
@@ -54,9 +54,9 @@
             <PackagePath/>
         </Content>
     </ItemGroup>
-    
+
     <PropertyGroup>
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
-    
+
 </Project>

@@ -12,7 +12,7 @@
         <FileVersion>$(Version)</FileVersion>
         <AssemblyVersion>$(Version)</AssemblyVersion>
     </PropertyGroup>
-    
+
     <PropertyGroup>
         <RepositoryType>git</RepositoryType>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -23,13 +23,13 @@
     <PropertyGroup>
         <Description>Add-on for masstransit kafka with the addition of protobuf serialization and deserialization</Description>
     </PropertyGroup>
-    
+
     <ItemGroup>
-      <None Include="..\..\..\contents\stbl.synaptix.gzs.png">
-        <Pack>True</Pack>
-        <PackagePath/>
-        <Link>stbl.synaptix.gzs.png</Link>
-      </None>
+        <None Include="..\..\..\contents\stbl.synaptix.gzs.png">
+            <Pack>True</Pack>
+            <PackagePath/>
+            <Link>stbl.synaptix.gzs.png</Link>
+        </None>
     </ItemGroup>
 
     <ItemGroup>
@@ -41,12 +41,12 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="protobuf-net" Version="3.*" />
-      <PackageReference Include="MassTransit.Kafka" Version="8.5.2" />
+        <PackageReference Include="protobuf-net" Version="3.*"/>
+        <PackageReference Include="MassTransit.Kafka" Version="8.5.9" />
     </ItemGroup>
 
     <PropertyGroup>
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
-    
+
 </Project>

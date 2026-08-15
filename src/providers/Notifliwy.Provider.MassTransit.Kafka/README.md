@@ -1,6 +1,6 @@
 # Notifliwy.Provider.MassTransit.Kafka
 
-Provider configuring **MassTransit** communication with `ConnectorGroup` **Notifliwy**. 
+Provider configuring **MassTransit** communication with `ConnectorGroup` **Notifliwy**.
 Technical adds as consumer main providers on the `InputPipe` side
 
 ## Configuration

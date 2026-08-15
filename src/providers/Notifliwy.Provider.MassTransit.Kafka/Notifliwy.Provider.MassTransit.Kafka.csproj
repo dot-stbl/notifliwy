@@ -10,11 +10,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="MassTransit.Kafka" Version="8.*" />
+        <PackageReference Include="MassTransit.Kafka" Version="8.*"/>
     </ItemGroup>
-    
+
     <ItemGroup>
-      <ProjectReference Include="..\..\libraries\Notifliwy\Notifliwy.csproj" />
+        <ProjectReference Include="..\..\libraries\Notifliwy\Notifliwy.csproj"/>
     </ItemGroup>
 
     <PropertyGroup>
@@ -24,7 +24,7 @@
     <PropertyGroup>
         <Description>MassTransit Kafka consumer integration with Notifliwy input pipe</Description>
     </PropertyGroup>
-    
+
     <ItemGroup>
         <Content Include="README.md">
             <Link>README.md</Link>
@@ -34,11 +34,11 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Include="..\..\..\contents\icon.main.provider.png">
-        <Pack>True</Pack>
-        <PackagePath/>
-        <Link>icon.main.provider.png</Link>
-      </None>
+        <None Include="..\..\..\contents\icon.main.provider.png">
+            <Pack>True</Pack>
+            <PackagePath/>
+            <Link>icon.main.provider.png</Link>
+        </None>
     </ItemGroup>
 
     <PropertyGroup>
@@ -46,9 +46,9 @@
         <FileVersion>$(Version)</FileVersion>
         <AssemblyVersion>$(Version)</AssemblyVersion>
     </PropertyGroup>
-    
+
     <PropertyGroup>
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
-    
+
 </Project>

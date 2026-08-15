@@ -11,8 +11,8 @@ builder.Services.AddNotifliwyServer(serverBuilder =>
     serverBuilder.AddNotification<TestNotification, TestEvent>(sectorBuilder =>
     {
         sectorBuilder
-            .AddMapper<TestMapper>()
-            .AddCondition<TestCondition>();
+                .AddMapper<TestMapper>()
+                .AddCondition<TestCondition>();
     });
 });
 

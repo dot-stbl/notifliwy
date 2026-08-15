@@ -14,28 +14,28 @@ builder.Services.AddMassTransit(configurator =>
 
     configurator.AddConfigureEndpointsCallback((_, endpointConfigurator) =>
     {
-        endpointConfigurator.UseCircuitBreaker(configure: breakerConfigurator =>
+        endpointConfigurator.UseCircuitBreaker(breakerConfigurator =>
         {
             breakerConfigurator.ResetInterval = TimeSpan.FromSeconds(5);
         });
     });
 
-    configurator.AddRider(configure: registrationConfigurator =>
+    configurator.AddRider(registrationConfigurator =>
     {
-        registrationConfigurator.AddProducer<CatMeowEvent>(topicName: "meow.event");
+        registrationConfigurator.AddProducer<CatMeowEvent>("meow.event");
 
-        registrationConfigurator.UsingKafka(configure: (_, factoryConfigurator) =>
+        registrationConfigurator.UsingKafka((_, factoryConfigurator) =>
         {
             factoryConfigurator.SetSerializationFactory(new ProtobufKafkaSerializerFactory());
 
-            factoryConfigurator.Host(server: "localhost:9092");
+            factoryConfigurator.Host("localhost:9092");
 
             factoryConfigurator.TopicEndpoint<CatMeowEvent>(
                 groupId: "meow-group",
                 topicName: "meow.event",
                 configure: endpoint =>
                 {
-                    endpoint.CreateIfMissing(configure: options =>
+                    endpoint.CreateIfMissing(options =>
                     {
                         options.ReplicationFactor = 1;
                     });

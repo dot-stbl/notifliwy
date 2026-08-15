@@ -14,16 +14,15 @@ using Synaptix.MassTransit.Kafka.Protobuf;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Logging
-    .ClearProviders()
-    .AddConsole();
+        .ClearProviders()
+        .AddConsole();
 
-builder.Services.AddDbContext<TempDbContext>(
-    optionsAction: optionsBuilder =>
-    {
-        optionsBuilder
-            .UseInMemoryDatabase(databaseName: "cat-meow.db")
+builder.Services.AddDbContext<TempDbContext>(optionsBuilder =>
+{
+    optionsBuilder
+            .UseInMemoryDatabase("cat-meow.db")
             .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-    });
+});
 
 builder.Services.AddMassTransit(configurator =>
 {
@@ -34,28 +33,29 @@ builder.Services.AddMassTransit(configurator =>
 
     configurator.AddConfigureEndpointsCallback((_, endpointConfigurator) =>
     {
-        endpointConfigurator.UseCircuitBreaker(configure: breakerConfigurator =>
+        endpointConfigurator.UseCircuitBreaker(breakerConfigurator =>
         {
             breakerConfigurator.ResetInterval = TimeSpan.FromSeconds(5);
         });
     });
 
-    configurator.AddRider(configure: registrationConfigurator =>
+    configurator.AddRider(registrationConfigurator =>
     {
         registrationConfigurator.AddNotifliwyPipe<CatMeowEvent>();
 
-        registrationConfigurator.UsingKafka(configure: (context, factoryConfigurator) =>
+        registrationConfigurator.UsingKafka((context, factoryConfigurator) =>
         {
             factoryConfigurator.SetSerializationFactory(new ProtobufKafkaSerializerFactory());
 
-            factoryConfigurator.Host(server: "localhost:9092");
+            factoryConfigurator.Host("localhost:9092");
 
+            var id = Random.Shared.Next(0, 999);
             factoryConfigurator.TopicEndpoint<CatMeowEvent>(
-                groupId: "meow-group",
+                groupId: $"meow-group-{id}",
                 topicName: "meow.event",
                 configure: endpoint =>
                 {
-                    endpoint.GroupInstanceId = "notifliwy-cns-01";
+                    endpoint.GroupInstanceId = $"notifliwy-cns-{id}";
 
                     endpoint.AutoOffsetReset = AutoOffsetReset.Latest;
                     endpoint.SessionTimeout = TimeSpan.FromMilliseconds(45000);
@@ -95,23 +95,23 @@ builder.Services.AddNotifliwyServer(serverBuilder =>
 });
 
 builder.Services.AddOpenTelemetry()
-    .ConfigureResource(resourceBuilder =>
-    {
-        resourceBuilder
-            .AddService(serviceName: "cat.kafka.sample.server")
-            .AddEnvironmentVariableDetector()
-            .AddTelemetrySdk();
-    })
-    .WithTracing(providerBuilder =>
-    {
-        providerBuilder.AddNotifliwyServerInstrumentation();
-
-        providerBuilder.AddOtlpExporter(options =>
+        .ConfigureResource(resourceBuilder =>
         {
-            options.Protocol = OtlpExportProtocol.Grpc;
-            options.Endpoint = new Uri("http://localhost:4317");
+            resourceBuilder
+                    .AddService("cat.kafka.sample.server")
+                    .AddEnvironmentVariableDetector()
+                    .AddTelemetrySdk();
+        })
+        .WithTracing(providerBuilder =>
+        {
+            providerBuilder.AddNotifliwyServerInstrumentation();
+
+            providerBuilder.AddOtlpExporter(options =>
+            {
+                options.Protocol = OtlpExportProtocol.Grpc;
+                options.Endpoint = new Uri("http://localhost:4317");
+            });
         });
-    });
 
 var app = builder.Build();
 

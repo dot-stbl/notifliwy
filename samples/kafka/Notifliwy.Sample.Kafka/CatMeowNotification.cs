@@ -7,13 +7,13 @@ namespace Notifliwy.Sample.Kafka;
 public class CatMeowNotification
 {
     [Key]
-    [ProtoMember(tag: 3, IsRequired = true)]
+    [ProtoMember(3, IsRequired = true)]
     public Guid Id { get; set; } = Guid.NewGuid();
 
-    [ProtoMember(tag: 1, IsRequired = true)]
+    [ProtoMember(1, IsRequired = true)]
     public required string KittyMean { get; set; }
 
-    [ProtoMember(tag: 2, IsRequired = false)]
+    [ProtoMember(2, IsRequired = false)]
     public string? Color { get; set; }
 }
 

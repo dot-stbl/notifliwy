@@ -27,21 +27,21 @@ public static class MassTransitKafkaExtensions
             where TEvent : class
     {
         registrationConfigurator.AddSingleton(
-            serviceType: typeof(IInMemoryEventExchange<TEvent>),
-            implementationType: typeof(InMemoryEventExchange<TEvent>));
+            typeof(IInMemoryEventExchange<TEvent>),
+            typeof(InMemoryEventExchange<TEvent>));
 
         registrationConfigurator.AddTransient(
-            serviceType: typeof(IExportPipe<TEvent>),
-            implementationType: typeof(InMemoryExportPipe<TEvent>));
+            typeof(IExportPipe<TEvent>),
+            typeof(InMemoryExportPipe<TEvent>));
 
         registrationConfigurator.AddTransient(
-            serviceType: typeof(IInputPipe<TEvent>),
-            implementationType: typeof(InMemoryInputPipe<TEvent>));
+            typeof(IInputPipe<TEvent>),
+            typeof(InMemoryInputPipe<TEvent>));
 
         registrationConfigurator.AddSingleton(
             MicrosoftExtensions.Options.Create(new InMemoryExchangeOptions
             {
-                ChannelOptions = new BoundedChannelOptions(capacity: 10_000)
+                ChannelOptions = new BoundedChannelOptions(10_000)
                 {
                     FullMode = BoundedChannelFullMode.Wait
                 }
