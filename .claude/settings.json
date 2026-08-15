@@ -1,0 +1,46 @@
+{
+  "permissions": {
+    "allowMcp": true,
+    "autoAccept": true,
+    "allow": [
+      "Write(.claude/skills)",
+      "Write(docs/superpowers/specs)",
+      "Bash(dotnet build *)",
+      "Bash(dotnet *)",
+      "Edit(*)",
+      "Write(*)",
+      "Read",
+      "Agent",
+      "Bash(claude *)"
+    ],
+    "deny": [
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(git pull *)",
+      "Bash(git reset *)",
+      "Bash(git rebase *)",
+      "Bash(git stash *)",
+      "Bash(git checkout *)",
+      "Bash(git branch *)",
+      "Bash(git merge *)",
+      "Bash(git cherry-pick *)",
+      "Bash(git reflog *)",
+      "Bash(git add *)",
+      "Bash(git rm *)",
+      "Bash(git mv *)",
+      "Bash(git tag *)",
+      "Bash(git lfs *)"
+    ]
+  },
+  "hooks": {
+    "PostToolBatch": [{
+      "matcher": "Write|Edit|Bash",
+      "hooks": [{
+        "type": "agent",
+        "prompt": "You are a code compliance fixer for the project.\n\nAfter tools Write, Edit, or Bash have been used, invoke the code-fix-to-rules skill to check and fix any CLAUDE.md rule violations.\n\nIMPORTANT: Always use the Skill tool to invoke the 'code-fix-to-rules' skill.\n\nCheck for these rule violations and fix them:\n1. Naming: NO underscore prefix for private fields (use auto-properties or primary constructors)\n2. Patterns: NO private methods (use local functions or file-scoped helpers), use primary constructors\n3. Comments: NO inline `//` or `/* */` comments - only `/// <summary>` XML docs allowed\n4. XML Docs: Add `<summary>` to interfaces/base classes\n5. Logging: Use structured logging, NOT string interpolation\n6. Factory methods: Use `Entity.Create...()` not `new Entity()`\n\nTarget files:\n- If git modified files are contextually available, fix ONLY those\n- Otherwise scan entire src/ and test/ directories\n\nAfter fixing, run `dotnet build` to verify compilation.\n\nReport findings in this format:\n```\n🔧 Code compliance check:\n- Files checked: N\n- Violations fixed: N (Naming: N, Patterns: N, Comments: N, etc.)\n- Build: ✅ / ❌\n```",
+        "timeout": 120,
+        "model": "sonnet"
+      }]
+    }]
+  }
+}
