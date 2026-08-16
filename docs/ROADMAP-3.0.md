@@ -24,8 +24,8 @@ Status as of 2026-08-16. Goal: ship a **clean, honest 3.x** surface (core + Kafk
 ## Pre-3.0 hardening (recommended order)
 
 1. **TFM policy** — net6/net7 are EOL. Decide: keep multi-target for consumers still on 6/7, or drop to `net8.0` only (simpler packages, fewer warnings). Document in README.
-2. **MassTransit version pin** — samples/provider still mix 8.5.9 vs transitive 8.5.10 (MSB3277). Align `MassTransit.Kafka` versions in provider + samples.
-3. **Kafka sample honesty** — comment said independent pipelines; runtime chains. Either one pipeline in the sample or wait for #9. Prefer sample fix now (docs already say chain).
+2. [x] **MassTransit version pin** — provider + samples on `MassTransit.Kafka` 8.5.10; dropped obsolete `MassTransit.AspNetCore` 7.3.1 from sample.
+3. [x] **Kafka sample honesty** — single chained `WithPipeline` (Color → ConstantColor); removed Clear step and independent-pipeline comment.
 4. **NuGet unlist / deprecation** for `Synaptix.MassTransit.Kafka.Protobuf` on nuget.org (repo already dropped it). Manual on nuget.org — not automated here.
 5. **Public API review** — seal what should be sealed, XML docs on public surface, remove dead types if any.
 6. **CI** — ensure `dotnet build` + `dotnet test test/Notifliwy.Units` on PR (if not already).

@@ -72,20 +72,13 @@ builder.Services.AddNotifliwyServer(serverBuilder =>
         sectorBuilder.AddMapper<CatMeowMapper>();
         sectorBuilder.AddCondition<CatMeowCondition>();
 
-        //independent pipelines for certain notifications
+        // Pipelines chain: each step sees the previous result (see GH #9 for future fan-out design).
         sectorBuilder.WithPipeline(pipelineBuilder =>
         {
             pipelineBuilder.AddStep<ColorNotificationStep>();
-            pipelineBuilder.AddStep<ClearNotificationStep>();
-        });
-
-        //second pipeline after first
-        sectorBuilder.WithPipeline(pipelineBuilder =>
-        {
             pipelineBuilder.AddStep<ConstantColorNotificationStep>();
         });
 
-        //Custom exporters
         sectorBuilder.AddExporter<CatNotificationConsoleExporter>();
         sectorBuilder.AddExporter<CatNotificationDatabaseExporter>();
     });

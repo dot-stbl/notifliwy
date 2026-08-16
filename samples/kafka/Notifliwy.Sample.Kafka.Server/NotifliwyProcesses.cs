@@ -51,21 +51,6 @@ public class ColorNotificationStep : INotificationStep<CatMeowNotification>
 }
 
 /// <inheritdoc />
-public class ClearNotificationStep : INotificationStep<CatMeowNotification>
-{
-    /// <inheritdoc />
-    public ValueTask<CatMeowNotification> AggregateAsync(
-        CatMeowNotification notification,
-        CancellationToken cancellationToken = default)
-    {
-        notification.Color = string.Empty;
-        notification.KittyMean = string.Empty;
-
-        return ValueTask.FromResult(notification);
-    }
-}
-
-/// <inheritdoc />
 public class ConstantColorNotificationStep : INotificationStep<CatMeowNotification>
 {
     /// <inheritdoc />
