@@ -9,6 +9,7 @@ using Notifliwy.Dependency;
 using Notifliwy.Exporters.Interfaces;
 using Notifliwy.Mapper.Interfaces;
 using Notifliwy.Steps.Interfaces;
+using Notifliwy.Units.Helpers;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -85,7 +86,7 @@ public class EndToEndPipelineTests(ITestOutputHelper output)
     {
         // Arrange
         var exportedNotifications = new List<TestNotification>();
-        var services = new ServiceCollection();
+        var services = NotifliwyTestProviders.CreateServerCollection();
         services.AddSingleton(exportedNotifications);
         services.AddSingleton<CollectionExporter>();
 
@@ -146,7 +147,7 @@ public class EndToEndPipelineTests(ITestOutputHelper output)
     {
         // Arrange
         var exportedNotifications = new List<TestNotification>();
-        var services = new ServiceCollection();
+        var services = NotifliwyTestProviders.CreateServerCollection();
         services.AddSingleton(exportedNotifications);
         services.AddSingleton<CollectionExporter>();
 
@@ -197,7 +198,7 @@ public class EndToEndPipelineTests(ITestOutputHelper output)
     {
         // Arrange
         var exportedNotifications = new List<TestNotification>();
-        var services = new ServiceCollection();
+        var services = NotifliwyTestProviders.CreateServerCollection();
         services.AddSingleton(exportedNotifications);
         services.AddSingleton<CollectionExporter>();
 
@@ -250,11 +251,9 @@ public class EndToEndPipelineTests(ITestOutputHelper output)
         // Arrange
         var exported1 = new List<TestNotification>();
         var exported2 = new List<TestNotification>();
-        var services = new ServiceCollection();
-        services.AddSingleton(exported1);
-        services.AddSingleton(exported2);
-        services.AddSingleton<CollectionExporter>();
-        services.AddSingleton<CollectionExporter>();
+        var services = NotifliwyTestProviders.CreateServerCollection();
+        services.AddSingleton<INotificationExporter<TestNotification>>(new CollectionExporter(exported1));
+        services.AddSingleton<INotificationExporter<TestNotification>>(new CollectionExporter(exported2));
 
         services.AddNotifliwyServer(serverBuilder =>
         {
@@ -262,8 +261,6 @@ public class EndToEndPipelineTests(ITestOutputHelper output)
             serverBuilder.AddNotification<TestNotification, TestEvent>(sectorBuilder =>
             {
                 sectorBuilder.AddMapper<SimpleMapper>();
-                sectorBuilder.AddExporter<CollectionExporter>();
-                sectorBuilder.AddExporter<CollectionExporter>();
             });
         });
 
