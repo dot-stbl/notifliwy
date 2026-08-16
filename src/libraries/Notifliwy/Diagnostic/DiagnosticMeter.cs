@@ -7,6 +7,12 @@ namespace Notifliwy.Diagnostic;
 internal static class DiagnosticMeter
 {
     /// <summary>
+    /// Global <see cref="Notifliwy"/> <see cref="Meter"/> <c>name</c>, used to subscribe via
+    /// <c>MeterProviderBuilder.AddMeter</c> (matches the <see cref="NotifliwyServerMeter"/> name)
+    /// </summary>
+    internal const string MeterName = $"{nameof(Notifliwy)}.Server";
+
+    /// <summary>
     /// Global <see cref="Notifliwy"/> <see cref="Meter"/>
     /// </summary>
     public static readonly Meter NotifliwyServerMeter = CreateMeter(Assembly.GetExecutingAssembly());
@@ -26,5 +32,5 @@ internal static class DiagnosticMeter
         description: "Number of events with final notification processing");
 
     private static Meter CreateMeter(Assembly assembly) =>
-        new($"{nameof(Notifliwy)}.Server", $"{assembly.GetName().Version}");
+        new(MeterName, $"{assembly.GetName().Version}");
 }
