@@ -59,11 +59,12 @@ public class NotificationServerBuilder(IServiceCollection serviceCollection)
     public NotificationServerBuilder AddInMemoryInput(
         Action<InMemoryExchangeOptions>? configureExchange = null)
     {
+        var optionsBuilder = serviceCollection
+            .AddOptions<InMemoryExchangeOptions>();
+
         if (configureExchange != null)
         {
-            var exchangeOptions = new InMemoryExchangeOptions();
-            configureExchange.Invoke(exchangeOptions);
-            serviceCollection.AddSingleton(exchangeOptions);
+            optionsBuilder.Configure(configureExchange);
         }
 
         serviceCollection.AddSingleton(

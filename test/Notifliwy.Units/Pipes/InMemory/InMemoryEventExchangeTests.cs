@@ -87,6 +87,8 @@ public class InMemoryEventExchangeTests
             await exchange.EventExchange.Writer.WriteAsync(evt);
         }
 
+        exchange.EventExchange.Writer.Complete();
+
         // Assert
         var receivedEvents = new List<TestEvent>();
         await foreach (var evt in exchange.EventExchange.Reader.ReadAllAsync())
@@ -131,10 +133,11 @@ public class InMemoryEventExchangeTests
         // Act
         await exchange.EventExchange.Writer.WriteAsync(new TestEvent { Value = 1 });
         await exchange.EventExchange.Writer.WriteAsync(new TestEvent { Value = 2 });
-        var writeTask = exchange.EventExchange.Writer.WriteAsync(new TestEvent { Value = 3 });
+        var writeTask = exchange.EventExchange.Writer
+            .WriteAsync(new TestEvent { Value = 3 }).AsTask();
 
         // Assert
-        writeTask.AsTask().Status.ShouldBe(TaskStatus.WaitingForActivation);
+        writeTask.Status.ShouldBe(TaskStatus.WaitingForActivation);
 
         // Clean up
         await exchange.EventExchange.Reader.ReadAsync();
@@ -159,6 +162,8 @@ public class InMemoryEventExchangeTests
         await exchange.EventExchange.Writer.WriteAsync(new TestEvent { Value = 1 });
         await exchange.EventExchange.Writer.WriteAsync(new TestEvent { Value = 2 });
         await exchange.EventExchange.Writer.WriteAsync(new TestEvent { Value = 3 });
+
+        exchange.EventExchange.Writer.Complete();
 
         // Assert
         var receivedEvents = new List<TestEvent>();
@@ -186,6 +191,8 @@ public class InMemoryEventExchangeTests
         {
             await exchange.EventExchange.Writer.WriteAsync(new TestEvent { Value = i });
         }
+
+        exchange.EventExchange.Writer.Complete();
 
         // Assert
         var count = 0;

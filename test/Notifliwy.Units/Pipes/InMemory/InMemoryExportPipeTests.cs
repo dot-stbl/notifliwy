@@ -2,12 +2,12 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Threading.Channels;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Notifliwy.Pipes.InMemory;
 using Notifliwy.Pipes.InMemory.Interfaces;
 using Notifliwy.Pipes.InMemory.Options;
+using Notifliwy.Pipes.Interfaces;
+using Notifliwy.Units.Helpers;
 using Shouldly;
 using Xunit;
 
@@ -27,15 +27,10 @@ public class InMemoryExportPipeTests
     public async Task ExportAsync_ShouldWriteEventToExchange()
     {
         // Arrange
-        var services = new ServiceCollection();
-        services.AddLogging();
-        services.AddSingleton<IOptions<InMemoryExchangeOptions>>(Options.Create(new InMemoryExchangeOptions()));
-        services.AddSingleton<IInMemoryEventExchange<TestEvent>, InMemoryEventExchange<TestEvent>>();
-        services.AddLogging();
-        var serviceProvider = services.BuildServiceProvider();
+        var serviceProvider = NotifliwyTestProviders.BuildInMemoryProvider();
 
         var exchange = serviceProvider.GetRequiredService<IInMemoryEventExchange<TestEvent>>();
-        var pipe = serviceProvider.GetRequiredService<InMemoryExportPipe<TestEvent>>();
+        var pipe = serviceProvider.GetRequiredService<IExportPipe<TestEvent>>();
 
         var expectedEvent = new TestEvent { Value = 42 };
 
@@ -52,15 +47,10 @@ public class InMemoryExportPipeTests
     public async Task ExportAsync_ShouldWriteMultipleEventsSequentially()
     {
         // Arrange
-        var services = new ServiceCollection();
-        services.AddLogging();
-        services.AddSingleton<IOptions<InMemoryExchangeOptions>>(Options.Create(new InMemoryExchangeOptions()));
-        services.AddSingleton<IInMemoryEventExchange<TestEvent>, InMemoryEventExchange<TestEvent>>();
-        services.AddLogging();
-        var serviceProvider = services.BuildServiceProvider();
+        var serviceProvider = NotifliwyTestProviders.BuildInMemoryProvider();
 
         var exchange = serviceProvider.GetRequiredService<IInMemoryEventExchange<TestEvent>>();
-        var pipe = serviceProvider.GetRequiredService<InMemoryExportPipe<TestEvent>>();
+        var pipe = serviceProvider.GetRequiredService<IExportPipe<TestEvent>>();
 
         var events = new[]
         {
@@ -74,6 +64,8 @@ public class InMemoryExportPipeTests
         {
             await pipe.ExportAsync(evt);
         }
+
+        exchange.EventExchange.Writer.Complete();
 
         // Assert
         var receivedEvents = new List<TestEvent>();
@@ -92,14 +84,9 @@ public class InMemoryExportPipeTests
     public async Task ExportAsync_ShouldRespectCancellationToken()
     {
         // Arrange
-        var services = new ServiceCollection();
-        services.AddLogging();
-        services.AddSingleton<IOptions<InMemoryExchangeOptions>>(Options.Create(new InMemoryExchangeOptions()));
-        services.AddSingleton<IInMemoryEventExchange<TestEvent>, InMemoryEventExchange<TestEvent>>();
-        services.AddLogging();
-        var serviceProvider = services.BuildServiceProvider();
+        var serviceProvider = NotifliwyTestProviders.BuildInMemoryProvider();
 
-        var pipe = serviceProvider.GetRequiredService<InMemoryExportPipe<TestEvent>>();
+        var pipe = serviceProvider.GetRequiredService<IExportPipe<TestEvent>>();
 
         var cts = new CancellationTokenSource();
         cts.Cancel();
@@ -115,21 +102,18 @@ public class InMemoryExportPipeTests
     public async Task ExportAsync_WithMultiplePipes_ShouldWriteToSameExchange()
     {
         // Arrange
-        var services = new ServiceCollection();
-        services.AddLogging();
-        services.AddSingleton<IOptions<InMemoryExchangeOptions>>(Options.Create(new InMemoryExchangeOptions()));
-        services.AddSingleton<IInMemoryEventExchange<TestEvent>, InMemoryEventExchange<TestEvent>>();
-        services.AddLogging();
-        var serviceProvider = services.BuildServiceProvider();
+        var serviceProvider = NotifliwyTestProviders.BuildInMemoryProvider();
 
         var exchange = serviceProvider.GetRequiredService<IInMemoryEventExchange<TestEvent>>();
-        var pipe1 = serviceProvider.GetRequiredService<InMemoryExportPipe<TestEvent>>();
-        var pipe2 = serviceProvider.GetRequiredService<InMemoryExportPipe<TestEvent>>();
+        var pipe1 = serviceProvider.GetRequiredService<IExportPipe<TestEvent>>();
+        var pipe2 = serviceProvider.GetRequiredService<IExportPipe<TestEvent>>();
 
         // Act
         await pipe1.ExportAsync(new TestEvent { Value = 1 });
         await pipe2.ExportAsync(new TestEvent { Value = 2 });
         await pipe1.ExportAsync(new TestEvent { Value = 3 });
+
+        exchange.EventExchange.Writer.Complete();
 
         // Assert
         var receivedEvents = new List<TestEvent>();
@@ -146,32 +130,27 @@ public class InMemoryExportPipeTests
     public async Task ExportAsync_WithBoundedChannel_ShouldRespectCapacity()
     {
         // Arrange
-        var services = new ServiceCollection();
-        services.AddLogging();
-        services.AddSingleton<IOptions<InMemoryExchangeOptions>>(Options.Create(new InMemoryExchangeOptions
-        {
-            ChannelOptions = new System.Threading.Channels.BoundedChannelOptions(2)
+        var serviceProvider = NotifliwyTestProviders.BuildInMemoryProvider(options => options
+            .ChannelOptions = new BoundedChannelOptions(capacity: 2)
             {
-                FullMode = System.Threading.Channels.BoundedChannelFullMode.Wait
-            }
-        }));
-        services.AddSingleton<IInMemoryEventExchange<TestEvent>, InMemoryEventExchange<TestEvent>>();
-        services.AddLogging();
-        var serviceProvider = services.BuildServiceProvider();
+                FullMode = BoundedChannelFullMode.Wait
+            });
 
         var exchange = serviceProvider.GetRequiredService<IInMemoryEventExchange<TestEvent>>();
-        var pipe = serviceProvider.GetRequiredService<InMemoryExportPipe<TestEvent>>();
+        var pipe = serviceProvider.GetRequiredService<IExportPipe<TestEvent>>();
 
         // Act
         await pipe.ExportAsync(new TestEvent { Value = 1 });
         await pipe.ExportAsync(new TestEvent { Value = 2 });
-        var writeTask3 = pipe.ExportAsync(new TestEvent { Value = 3 });
+        var pendingWrite = pipe.ExportAsync(new TestEvent { Value = 3 }).AsTask();
 
-        // Wait a bit to ensure write is still pending
+        // Assert - channel is full (capacity 2), third write waits for free space
         await Task.Delay(50);
+        pendingWrite.IsCompleted.ShouldBeFalse();
 
-        // Assert - writeTask3 should still be pending (not completed)
-        // Channel with capacity 2, we wrote 2, third should be waiting
-        await writeTask3;
+        var freedEvent = await exchange.EventExchange.Reader.ReadAsync();
+        freedEvent.Value.ShouldBe(1);
+
+        await pendingWrite;
     }
 }
