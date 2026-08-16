@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Notifliwy.Conditions.Interfaces;
+using Notifliwy.Config.Internals;
 using Notifliwy.Custom.Interfaces;
+using Notifliwy.Exceptions;
 using Notifliwy.Exporters.Interfaces;
-using Notifliwy.Graph.Internals;
 using Notifliwy.Join.Interfaces;
 using Notifliwy.Mapper.Interfaces;
 using Notifliwy.Transform.Interfaces;
@@ -16,26 +17,53 @@ using Notifliwy.Transform.Interfaces;
 namespace Notifliwy.Graph.Internals;
 
 /// <summary>
-/// Executes one sector graph plan for a single event: conditions → map → node walk.
-/// Branch fan-outs run their sub-graphs in parallel (<see cref="Task.WhenAll"/>)
-/// under the node's <see cref="BranchPolicy"/>; a join reduces the branch outputs
-/// back into the main path (single-branch join is a passthrough that skips the reducer).
+/// Executes one sector graph plan for a single event. At construction (startup for
+/// a hosted server) the executor asks <see cref="SectorGraphCompiler"/> to select
+/// the execution path per the sector's <see cref="Config.SectorExecution"/>:
+/// <list type="bullet">
+///     <item><b>Compiled</b> — every node resolved or constructed once, direct invokes,
+///     no per-event DI scope. <c>Compiled</c> mode fails fast with
+///     <see cref="SectorCaptiveDependencyException"/> on scoped/unprovable nodes;
+///     <c>Auto</c> falls back to the scoped path with a logged reason.</item>
+///     <item><b>Scoped</b> — conditions → map → node walk, every node resolved from a
+///     fresh DI scope. Branch fan-outs run their sub-graphs in parallel
+///     (<see cref="Task.WhenAll"/>) under the node's <see cref="BranchPolicy"/>; a
+///     join reduces the branch outputs back into the main path (single-branch join
+///     is a passthrough that skips the reducer).</item>
+/// </list>
 /// </summary>
 /// <typeparam name="TNotification">The notification type produced by the <c>Map</c> node</typeparam>
 /// <typeparam name="TEvent">The event type consumed by the sector</typeparam>
 internal sealed class SectorGraphExecutor<TNotification, TEvent>(
     SectorGraphPlan<TNotification, TEvent> plan,
     IServiceScopeFactory scopeFactory,
+    IServiceProvider rootProvider,
+    IServiceCollection serviceCollection,
     ILogger<SectorGraphExecutor<TNotification, TEvent>>? logger = null)
 {
+    private readonly ExecutionSelection selection = SelectExecution(plan, rootProvider, serviceCollection, logger);
+
     /// <summary>
-    /// The main method that processes a single event through the whole graph,
-    /// resolving node services from a fresh DI scope.
+    /// Effective execution decision made at startup: the chosen mode and, for the
+    /// scoped path, the reasons that blocked compilation. Exposed for tests and
+    /// diagnostics.
+    /// </summary>
+    public SectorExecutionDecision Decision => selection.Decision;
+
+    /// <summary>
+    /// The main method that processes a single event through the whole graph on the
+    /// selected path: compiled instance graph, or a fresh DI scope per event.
     /// </summary>
     public async ValueTask ExecuteAsync(
         TEvent inputEvent,
         CancellationToken cancellationToken = default)
     {
+        if (selection.Compiled is { } compiled)
+        {
+            await ExecuteCompiledAsync(compiled, inputEvent, cancellationToken);
+            return;
+        }
+
         await using var scope = scopeFactory.CreateAsyncScope();
 
         await ExecuteScopeAsync(scope.ServiceProvider, inputEvent, cancellationToken);
@@ -264,5 +292,235 @@ internal sealed class SectorGraphExecutor<TNotification, TEvent>(
         public TNotification? Notification { get; } = notification;
 
         public bool Survived { get; } = survived;
+    }
+
+    /// <summary>
+    /// Compiled-path execution: conditions → map → node walk over pre-resolved
+    /// instances, mirroring the scoped walk node for node.
+    /// </summary>
+    private async ValueTask ExecuteCompiledAsync(
+        CompiledSectorPlan<TNotification, TEvent> compiled,
+        TEvent inputEvent,
+        CancellationToken cancellationToken)
+    {
+        foreach (var condition in compiled.Conditions)
+        {
+            if (!await condition.AllowItAsync(inputEvent, cancellationToken))
+            {
+                return;
+            }
+        }
+
+        if (compiled.Map is not { } map)
+        {
+            // unreachable: only branch sub-plans have no map and those run through
+            // RunCompiledNodesAsync directly
+            return;
+        }
+
+        var current = await map(inputEvent, cancellationToken);
+
+        await RunCompiledNodesAsync(compiled.Nodes, current, cancellationToken);
+    }
+
+    private async ValueTask<TNotification> RunCompiledNodesAsync(
+        IReadOnlyList<CompiledNodeDefinition<TNotification, TEvent>> nodes,
+        TNotification current,
+        CancellationToken cancellationToken)
+    {
+        TNotification[]? pendingBranchOutputs = null;
+
+        foreach (var node in nodes)
+        {
+            switch (node)
+            {
+                case CompiledTransformNode<TNotification, TEvent> transformNode:
+                {
+                    current = await transformNode.Transform.TransformAsync(current, cancellationToken);
+                    break;
+                }
+
+                case CompiledCustomNode<TNotification, TEvent> customNode:
+                {
+                    current = await customNode.Invocation(current, cancellationToken);
+                    break;
+                }
+
+                case CompiledExportNode<TNotification, TEvent> exportNode:
+                {
+                    await exportNode.Exporter.ThrowAsync(current, cancellationToken);
+                    break;
+                }
+
+                case CompiledBranchNode<TNotification, TEvent> branchNode:
+                {
+                    // the fan-out does not change the main-path notification until a Join consumes the outputs
+                    pendingBranchOutputs = await RunCompiledBranchesAsync(branchNode, current, cancellationToken);
+                    break;
+                }
+
+                case CompiledJoinNode<TNotification, TEvent> joinNode:
+                {
+                    if (pendingBranchOutputs is not { } branchOutputs)
+                    {
+                        // unreachable for validated plans: Join always follows a Branch
+                        break;
+                    }
+
+                    if (branchOutputs.Length == 1)
+                    {
+                        // single-branch join is a passthrough — the reducer is not invoked
+                        current = branchOutputs[0];
+                    }
+                    else
+                    {
+                        current = await joinNode.Join.JoinAsync(branchOutputs, cancellationToken);
+                    }
+
+                    pendingBranchOutputs = null;
+                    break;
+                }
+            }
+        }
+
+        return current;
+    }
+
+    private async ValueTask<TNotification[]> RunCompiledBranchesAsync(
+        CompiledBranchNode<TNotification, TEvent> branchNode,
+        TNotification input,
+        CancellationToken cancellationToken)
+    {
+        var policy = branchNode.PolicyOverride
+                ?? plan.DefaultBranchPolicy
+                ?? BranchPolicy.FailFast;
+
+        if (policy == BranchPolicy.FailFast)
+        {
+            var tasks = branchNode.BranchPlans
+                    .Select(branchPlan => RunCompiledNodesAsync(
+                            branchPlan.Nodes,
+                            input,
+                            cancellationToken)
+                        .AsTask())
+                    .ToArray();
+
+            // Task.WhenAll observes every branch, then rethrows the first fault
+            return await Task.WhenAll(tasks);
+        }
+
+        var outcomes = branchNode.BranchPlans
+                .Select(branchPlan => RunCompiledBranchSafeAsync(branchPlan, input, cancellationToken))
+                .ToArray();
+
+        await Task.WhenAll(outcomes);
+
+        return outcomes
+            .Where(outcome => outcome.Result.Survived)
+            .Select(outcome => outcome.Result.Notification!)
+            .ToArray();
+    }
+
+    private async Task<BranchOutcome> RunCompiledBranchSafeAsync(
+        CompiledSectorPlan<TNotification, TEvent> branchPlan,
+        TNotification input,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var notification = await RunCompiledNodesAsync(
+                branchPlan.Nodes,
+                input,
+                cancellationToken);
+
+            return new BranchOutcome(notification, survived: true);
+        }
+        catch (Exception exception)
+            when (exception is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
+        {
+            logger?.LogError(
+                exception,
+                "BestEffort branch failed and was skipped for notification {NotificationType}",
+                typeof(TNotification).Name);
+
+            return new BranchOutcome(default, survived: false);
+        }
+    }
+
+    /// <summary>
+    /// Outcome of the startup path selection: the decision plus the compiled
+    /// instance graph when the compiled path was chosen.
+    /// </summary>
+    private sealed record ExecutionSelection(
+        SectorExecutionDecision Decision,
+        CompiledSectorPlan<TNotification, TEvent>? Compiled);
+
+    /// <summary>
+    /// Apply the sector's requested execution mode: force scoped, force compiled
+    /// (failing fast on captive/unprovable dependencies), or auto-select with a
+    /// logged fallback reason. Also resolves the one-shot assembly-scan warning
+    /// notice, if the sectors of this provider were discovered by reflection.
+    /// </summary>
+    private static ExecutionSelection SelectExecution(
+        SectorGraphPlan<TNotification, TEvent> plan,
+        IServiceProvider rootProvider,
+        IServiceCollection serviceCollection,
+        ILogger? logger)
+    {
+        // force materialization of the reflection-fallback warning when present
+        rootProvider.GetService<SectorAssemblyScanNotice>();
+
+        var sectorName = $"{typeof(TNotification).Name}/{typeof(TEvent).Name}";
+
+        switch (plan.Execution)
+        {
+            case Config.SectorExecution.Scoped:
+            {
+                const string forcedReason = "forced by SectorExecution.Scoped";
+
+                logger?.LogInformation("Sector {SectorName}: scoped path (reason: {Reason})", sectorName, forcedReason);
+
+                return new ExecutionSelection(
+                    SectorExecutionDecision.ForScoped(forcedReason),
+                    Compiled: null);
+            }
+
+            case Config.SectorExecution.Compiled:
+            {
+                var compiled = SectorGraphCompiler.TryCompile(plan, rootProvider, serviceCollection, out var blockers);
+
+                if (compiled is null)
+                {
+                    throw new SectorCaptiveDependencyException(sectorName, blockers);
+                }
+
+                logger?.LogInformation("Sector {SectorName}: compiled path", sectorName);
+
+                return new ExecutionSelection(SectorExecutionDecision.ForCompiled(), compiled);
+            }
+
+            default:
+            {
+                var compiled = SectorGraphCompiler.TryCompile(plan, rootProvider, serviceCollection, out var blockers);
+
+                if (compiled is { } compiledPlan)
+                {
+                    logger?.LogInformation("Sector {SectorName}: compiled path", sectorName);
+
+                    return new ExecutionSelection(SectorExecutionDecision.ForCompiled(), compiledPlan);
+                }
+
+                var reason = string.Join("; ", blockers);
+
+                logger?.LogInformation(
+                    "Sector {SectorName}: scoped path (reason: {Reason})",
+                    sectorName,
+                    reason);
+
+                return new ExecutionSelection(
+                    SectorExecutionDecision.ForScoped(blockers.ToArray()),
+                    Compiled: null);
+            }
+        }
     }
 }

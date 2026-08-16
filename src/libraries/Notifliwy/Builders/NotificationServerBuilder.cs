@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Notifliwy.Builders.Internals;
@@ -41,13 +42,52 @@ public class NotificationServerBuilder(IServiceCollection serviceCollection)
     public NotificationServerBuilder AddSector<TConfig>()
             where TConfig : class
     {
-        var (notificationType, eventType) = SectorConfigContract.Resolve(typeof(TConfig));
-
-        AddConfiguredSectorMethod
-            .MakeGenericMethod(notificationType, eventType, typeof(TConfig))
-            .Invoke(this, []);
+        AddConfiguredSectorByType(typeof(TConfig));
 
         return this;
+    }
+
+    /// <summary>
+    /// Register every <see langword="public"/> concrete sector configuration class
+    /// found in <paramref name="assembly"/> — the opt-in reflection fallback for
+    /// assembly discovery. Logs a startup warning recommending the
+    /// <see cref="NotifliwySectorsAttribute"/> source-generated registration, which
+    /// discovers sectors at compile time with zero runtime reflection.
+    /// </summary>
+    /// <param name="assembly">assembly scanned for <c>INotificationSectorConfig&lt;,&gt;</c> implementations</param>
+    public NotificationServerBuilder AddSectorsFromAssembly(Assembly assembly)
+    {
+        var configTypes = assembly
+            .GetTypes()
+            .Where(type => type is { IsClass: true, IsAbstract: false, IsGenericTypeDefinition: false, IsVisible: true }
+                    && type.GetInterfaces().Any(candidate => candidate.IsGenericType
+                        && candidate.GetGenericTypeDefinition() == typeof(INotificationSectorConfig<,>)))
+            .OrderBy(type => type.FullName, StringComparer.Ordinal)
+            .ToArray();
+
+        foreach (var configType in configTypes)
+        {
+            AddConfiguredSectorByType(configType);
+        }
+
+        serviceCollection.AddSectorAssemblyScanNotice();
+
+        return this;
+    }
+
+    /// <summary>
+    /// Shared reflection entry: resolves the closed config contract of
+    /// <paramref name="configType"/> and funnels it into the generic
+    /// <see cref="AddConfiguredSector{TNotification,TEvent,TConfig}"/> registration.
+    /// </summary>
+    /// <param name="configType">sector configuration class</param>
+    private void AddConfiguredSectorByType(Type configType)
+    {
+        var (notificationType, eventType) = SectorConfigContract.Resolve(configType);
+
+        AddConfiguredSectorMethod
+            .MakeGenericMethod(notificationType, eventType, configType)
+            .Invoke(this, []);
     }
 
     /// <summary>
@@ -94,8 +134,6 @@ public class NotificationServerBuilder(IServiceCollection serviceCollection)
             return graphBuilder.BuildPlan(config.DefaultBranchPolicy, config.Execution);
         });
 
-        serviceCollection.AddSingleton<SectorGraphExecutor<TNotification, TEvent>>();
-
         RegisterSectorServices<TNotification, TEvent>();
 
         return this;
@@ -110,6 +148,8 @@ public class NotificationServerBuilder(IServiceCollection serviceCollection)
         serviceCollection.AddTransient(
             typeof(INotificationSector<TEvent>),
             typeof(NotificationSector<TNotification, TEvent>));
+
+        serviceCollection.AddSectorGraphExecutor<TNotification, TEvent>();
 
         ConnectorsBuilders.Add(new ConnectorsBuilder<TEvent>());
     }

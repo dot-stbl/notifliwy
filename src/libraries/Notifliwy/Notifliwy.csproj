@@ -30,6 +30,25 @@
         <InternalsVisibleTo Include="Notifliwy.Sample.Kafka.Server"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <ProjectReference Include="..\..\generators\Notifliwy.Generators\Notifliwy.Generators.csproj"
+                          OutputItemType="Analyzer"
+                          ReferenceOutputAssembly="false"/>
+    </ItemGroup>
+
+    <!-- embed the sector registration source generator into the package analyzers slot,
+         so downstream consumers of Notifliwy get [NotifliwySectors] generation with no extra reference -->
+    <PropertyGroup>
+        <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);PackNotifliwySectorGenerator</TargetsForTfmSpecificBuildOutput>
+    </PropertyGroup>
+
+    <Target Name="PackNotifliwySectorGenerator" DependsOnTargets="ResolveReferences">
+        <ItemGroup>
+            <TfmSpecificPackageFile Include="..\..\generators\Notifliwy.Generators\bin\$(Configuration)\netstandard2.0\Notifliwy.Generators.dll"
+                                    PackagePath="analyzers/dotnet/cs/Notifliwy.Generators.dll"/>
+        </ItemGroup>
+    </Target>
+
     <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
         <PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0"/>
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0"/>

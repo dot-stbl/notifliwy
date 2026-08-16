@@ -35,9 +35,11 @@ namespace Notifliwy.Config.Interfaces;
 public interface INotificationSectorConfig<TNotification, TEvent>
 {
     /// <summary>
-    /// Execution mode for this sector. Defaults to <see cref="SectorExecution.Auto"/>;
-    /// <see cref="SectorExecution.Compiled"/> is reserved and falls back to
-    /// <see cref="SectorExecution.Scoped"/> until compiler support lands.
+    /// Execution mode for this sector. Defaults to <see cref="SectorExecution.Auto"/>,
+    /// which picks the compiled hot path when every node is compile-safe
+    /// (singleton-registered or stateless) and otherwise falls back to the scoped
+    /// path with a logged reason. <see cref="SectorExecution.Compiled"/> forces the
+    /// compiled path and fails fast on scoped dependencies.
     /// </summary>
     SectorExecution Execution => SectorExecution.Auto;
 

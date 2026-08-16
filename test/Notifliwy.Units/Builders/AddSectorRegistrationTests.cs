@@ -5,9 +5,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Notifliwy.Builders;
 using Notifliwy.Config;
 using Notifliwy.Config.Interfaces;
+using Notifliwy.Config.Internals;
 using Notifliwy.Connectors;
 using Notifliwy.Contexts.Interfaces;
 using Notifliwy.Dependency;
@@ -18,6 +20,7 @@ using Notifliwy.Graph.Interfaces;
 using Notifliwy.Graph.Internals;
 using Notifliwy.Mapper.Interfaces;
 using Notifliwy.Transform.Interfaces;
+using Notifliwy.Units.Graph;
 using Shouldly;
 using Xunit;
 
@@ -233,20 +236,51 @@ public class AddSectorRegistrationTests
     }
 
     [Fact]
-    public void AddSector_CompiledExecution_IsCarriedOnPlanUntilCompilerSupportLands()
+    public void AddSector_CompiledExecution_WithUnprovableNode_FailsFastAtSectorResolution()
     {
-        // Arrange
+        // Arrange - DoublerMapper is parameterless (compile-safe), but CollectionExporter
+        // is neither registered nor parameterless, so the graph cannot be proven compile-safe
         var services = new ServiceCollection();
         services.AddLogging();
 
-        // Act
         services.AddNotifliwyServer(serverBuilder => serverBuilder.AddSector<CompiledConfig>());
-        var serviceProvider = services.BuildServiceProvider();
 
-        var plan = serviceProvider.GetRequiredService<SectorGraphPlan<RegistrationNotification, RegistrationEvent>>();
+        using var serviceProvider = services.BuildServiceProvider();
 
-        // Assert - reserved value is recorded, execution still succeeds via scoped path
-        plan.Execution.ShouldBe(SectorExecution.Compiled);
+        // Act + Assert - Compiled mode no longer falls back: the captive-dependency
+        // guard throws when the sector (and with it the executor) is first resolved
+        var exception = Should.Throw<SectorCaptiveDependencyException>(
+            () => serviceProvider.GetRequiredService<INotificationSector<RegistrationEvent>>());
+
+        exception.Message.ShouldContain("RegistrationNotification/RegistrationEvent");
+        exception.Message.ShouldContain(nameof(CollectionExporter));
+    }
+
+    [Fact]
+    public async Task AddSector_CompiledExecution_WithCompileSafeNodes_RunsOnCompiledPath()
+    {
+        // Arrange - the exporter instance is singleton-registered, so every node is
+        // compile-safe and the compiled path activates instead of throwing
+        var exported = new List<RegistrationNotification>();
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddSingleton(new CollectionExporter(exported));
+
+        services.AddNotifliwyServer(serverBuilder => serverBuilder.AddSector<CompiledConfig>());
+
+        using var serviceProvider = services.BuildServiceProvider();
+
+        var executor = serviceProvider
+            .GetRequiredService<SectorGraphExecutor<RegistrationNotification, RegistrationEvent>>();
+
+        executor.Decision.Mode.ShouldBe(SectorExecutionMode.Compiled);
+
+        // Act
+        await executor.ExecuteAsync(new RegistrationEvent { Value = 21 });
+
+        // Assert
+        exported.Count.ShouldBe(1);
+        exported[0].Value.ShouldBe(42);
     }
 
     [Fact]
@@ -345,5 +379,54 @@ public class AddSectorRegistrationTests
         typeof(NotificationServerBuilder)
             .GetMethods()
             .ShouldNotContain(method => method.Name == "AddNotification");
+    }
+
+    [Fact]
+    public async Task AddSectorsFromAssembly_DiscoversPublicConfigs_AndProcessesEvents()
+    {
+        // Arrange
+        AssemblyScanSinks.Exports.Clear();
+
+        var services = new ServiceCollection();
+        services.AddLogging();
+
+        // Act - opt-in reflection fallback over this test assembly
+        services.AddNotifliwyServer(serverBuilder => serverBuilder
+            .AddSectorsFromAssembly(typeof(AssemblyScanConfig).Assembly));
+
+        await using var serviceProvider = services.BuildServiceProvider();
+
+        await serviceProvider
+            .GetRequiredService<INotificationSector<ScanEvent>>()
+            .PassThroughAsync(new ScanEvent { Value = 5 });
+
+        // Assert - the public config was discovered, registered and executed
+        AssemblyScanSinks.Exports.Count.ShouldBe(1);
+        AssemblyScanSinks.Exports.Single().Value.ShouldBe(15);
+    }
+
+    [Fact]
+    public void AddSectorsFromAssembly_LogsReflectionFallbackWarningAtStartup()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddLogging();
+
+        var spy = new SpyLogger<SectorAssemblyScanNotice>();
+        services.AddSingleton<ILogger<SectorAssemblyScanNotice>>(spy);
+
+        services.AddNotifliwyServer(serverBuilder => serverBuilder
+            .AddSectorsFromAssembly(typeof(AssemblyScanConfig).Assembly));
+
+        using var serviceProvider = services.BuildServiceProvider();
+
+        // Act - resolving the sector constructs the executor, which forces the
+        // one-shot assembly-scan notice and its warning
+        _ = serviceProvider.GetRequiredService<INotificationSector<ScanEvent>>();
+
+        // Assert
+        spy.Entries.ShouldContain(entry =>
+            entry.Level == LogLevel.Warning
+            && entry.Message.Contains("reflection fallback"));
     }
 }

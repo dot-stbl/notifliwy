@@ -8,17 +8,18 @@ using Notifliwy.Contexts.Interfaces;
 using Notifliwy.Diagnostic;
 using Notifliwy.Diagnostic.Additions;
 using Notifliwy.Extensions;
-using Notifliwy.Extensions.Dependency;
 using Notifliwy.Graph.Internals;
 
 namespace Notifliwy.Contexts;
 
 /// <summary>
 /// Base derived type of <see cref="INotificationSector{TEvent}"/> executing the
-/// sector graph plan: a fresh DI scope is created per event and every graph node
-/// is resolved from that scope. The graph executor (and therefore the plan) is
-/// resolved eagerly in the constructor, so an invalid graph fails at sector
-/// resolution — connector startup for a hosted server.
+/// sector graph plan through its <see cref="SectorGraphExecutor{TNotification,TEvent}"/>.
+/// The executor is resolved eagerly in the constructor, so an invalid graph or a
+/// compiled-mode captive-dependency violation fails at sector resolution —
+/// connector startup for a hosted server. Per-event scopes are owned by the
+/// executor: the compiled path runs without one, the scoped path creates one
+/// per event.
 /// </summary>
 /// <inheritdoc />
 public class NotificationSector<TNotification, TEvent>(
@@ -26,9 +27,6 @@ public class NotificationSector<TNotification, TEvent>(
 {
     private readonly SectorGraphExecutor<TNotification, TEvent> executor =
         serviceProvider.GetRequiredService<SectorGraphExecutor<TNotification, TEvent>>();
-
-    private readonly IServiceScopeFactory scopeFactory =
-        serviceProvider.GetRequiredService<IServiceScopeFactory>();
 
     private readonly ILogger<NotificationSector<TNotification, TEvent>>? logger =
         serviceProvider.GetService<ILogger<NotificationSector<TNotification, TEvent>>>();
@@ -42,9 +40,7 @@ public class NotificationSector<TNotification, TEvent>(
 
         try
         {
-            await using var scope = scopeFactory.CreateAsyncScope();
-
-            await executor.ExecuteScopeAsync(scope.ServiceProvider, inputEvent, cancellationToken);
+            await executor.ExecuteAsync(inputEvent, cancellationToken);
         }
         catch (Exception exception)
         {

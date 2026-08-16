@@ -190,8 +190,8 @@ internal sealed class SectorGraphPlan<TNotification, TEvent>(
     public BranchPolicy? DefaultBranchPolicy { get; } = defaultBranchPolicy;
 
     /// <summary>
-    /// Execution mode requested for this sector. Until the compiled path lands,
-    /// every mode executes with per-event scoped semantics.
+    /// Execution mode requested for this sector. The effective path (compiled vs
+    /// scoped) is selected at executor startup by <see cref="SectorGraphCompiler"/>.
     /// </summary>
     public SectorExecution Execution { get; } = execution;
 }

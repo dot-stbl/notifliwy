@@ -208,7 +208,7 @@ public class SectorGraphBuilder<TNotification, TEvent> : ISectorGraphBuilder<TNo
         }
 
         serviceCollection.AddSingleton(plan);
-        serviceCollection.AddSingleton<SectorGraphExecutor<TNotification, TEvent>>();
+        serviceCollection.AddSectorGraphExecutor<TNotification, TEvent>();
     }
 
     private static void RegisterIfMissing(

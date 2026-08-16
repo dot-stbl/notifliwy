@@ -16,10 +16,10 @@
 
 ## 3. Source generators
 
-- [ ] 3.1 Generator B: `[NotifliwySectors]` → generated `AddNotifliwySectors…()` registration
-- [ ] 3.2 Runtime `AddSectorsFromAssembly()` opt-in fallback with warning
-- [ ] 3.3 Generator C: compiled sector invoke for singleton/stateless graphs
-- [ ] 3.4 `SectorExecution.Auto|Compiled|Scoped` + fail-fast captive guard
+- [x] 3.1 Generator B: `[NotifliwySectors]` → generated `AddNotifliwySectors…()` registration
+- [x] 3.2 Runtime `AddSectorsFromAssembly()` opt-in fallback with warning
+- [x] 3.3 Generator C: compiled sector invoke for singleton/stateless graphs
+- [x] 3.4 `SectorExecution.Auto|Compiled|Scoped` + fail-fast captive guard
 
 ## 4. Mapping providers
 
@@ -31,8 +31,8 @@
 
 - [x] 5.1 Unit: each node type behaviour
 - [x] 5.2 Unit: graph compose — order, branch fan-out, join reduce, custom
-- [ ] 5.3 Unit: cycle rejection, multi-branch join without reducer error, Compiled+scoped fail-fast (graph structure validation done in Wave 1: Map missing/duplicate/order, dead-end branch, Join without Branch; remaining parts land with registration surface + Compiled mode)
-- [ ] 5.4 Dual-path: Compiled vs Scoped observable equality
+- [x] 5.3 Unit: cycle rejection, multi-branch join without reducer error, Compiled+scoped fail-fast (graph structure validation done in Wave 1: Map missing/duplicate/order, dead-end branch, Join without Branch; remaining parts land with registration surface + Compiled mode)
+- [x] 5.4 Dual-path: Compiled vs Scoped observable equality
 - [x] 5.5 BranchPolicy: FailFast rethrow vs BestEffort continue
 - [ ] 5.6 End-to-end: sector config class → events → exporters
 
