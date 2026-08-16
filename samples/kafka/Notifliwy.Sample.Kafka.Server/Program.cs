@@ -67,16 +67,7 @@ builder.Services.AddMassTransit(configurator =>
 
 builder.Services.AddNotifliwyServer(serverBuilder =>
 {
-    serverBuilder.AddSector<CatMeowNotification, CatMeowEvent>(graph => graph
-        .When<CatMeowCondition>()
-        .Map<CatMeowMapper>()
-
-        // Transforms run sequentially, each receiving the previous result.
-        .Transform<ColorNotificationTransform>()
-        .Transform<ConstantColorNotificationTransform>()
-
-        .Export<CatNotificationConsoleExporter>()
-        .Export<CatNotificationDatabaseExporter>());
+    serverBuilder.AddSector<CatMeowSector>();
 });
 
 builder.Services.AddOpenTelemetry()

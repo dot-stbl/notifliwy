@@ -10,4 +10,14 @@
         <ProjectReference Include="..\..\..\src\libraries\Notifliwy\Notifliwy.csproj"/>
     </ItemGroup>
 
+    <!-- repo-internal build only: analyzers do not flow transitively through
+         ProjectReference, so the sector generator is referenced directly here.
+         NuGet consumers get it automatically from the Notifliwy package
+         analyzers slot. -->
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\src\generators\Notifliwy.Generators\Notifliwy.Generators.csproj"
+                          OutputItemType="Analyzer"
+                          ReferenceOutputAssembly="false"/>
+    </ItemGroup>
+
 </Project>
