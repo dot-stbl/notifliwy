@@ -17,23 +17,17 @@ After executing `singleAction` for a single instance, the code falls through and
 
 ## Bug 2: Fire-and-forget Task.Run in NotificationConnector — Silent Exception Swallowing
 
-**File:** `src/libraries/Notifliwy/Connectors/NotificationConnector.cs`, line 48
+**File:** `src/libraries/Notifliwy/Connectors/NotificationConnector.cs`
 
 **Severity:** Medium
 
-**Status:** DOCUMENTED (not a bug - by design)
+**Status:** RESOLVED ✓ (connector rewritten)
 
-**Description:**
-`Task.Run` is used without `await`. Exceptions in sector processing are silently swallowed.
+**Description (original finding):**
+`Task.Run` was used without `await`, so exceptions in sector processing were silently swallowed.
 
 **Resolution:**
-Fire-and-forget is intentional here. Sector errors are caught and logged inside `SectorBlock.ProcessingAsync`. Added clarifying comment explaining this design decision.
-
-**Comment added:**
-```csharp
-// Fire-and-forget: sector errors are caught and logged inside SectorBlock.ProcessingAsync
-_ = Task.Run(() => sector.PassThroughAsync(handledEvent, token), token);
-```
+The connector no longer uses fire-and-forget `Task.Run`. It now awaits `Parallel.ForEachAsync` over all assigned sectors (`MaxDegreeOfParallelism = ProcessorCount`); sector errors are logged and rethrown, and the connector waits for every sector to finish before pulling the next event.
 
 ---
 
@@ -101,9 +95,9 @@ Guarded the condition check with `ConditionInstances.UseInstance` — an empty c
 | Bug | Status |
 |-----|--------|
 | #1 MultiplyServiceInstance.CheckoutInstanceAsync | FIXED |
-| #2 Fire-and-forget Task.Run | DOCUMENTED (by design) |
+| #2 Fire-and-forget Task.Run | RESOLVED (connector rewritten to awaited `Parallel.ForEachAsync`) |
 | #3 Duplicate ConnectorsBuilder | NOT A BUG (by design) |
-| #4 AggregateAsync Task vs ValueTask | OPEN |
+| #4 AggregateAsync Task vs ValueTask | FIXED |
 | #8 Empty condition set throws | FIXED |
 
-**Next action:** Fix Bug #4 (AggregateAsync ValueTask) — high priority due to performance impact.
+**No open items** — all findings are fixed or documented as intentional design.
