@@ -8,7 +8,7 @@ using Notifliwy.Conditions.Interfaces;
 using Notifliwy.Dependency;
 using Notifliwy.Exporters.Interfaces;
 using Notifliwy.Mapper.Interfaces;
-using Notifliwy.Steps.Interfaces;
+using Notifliwy.Transform.Interfaces;
 using Notifliwy.Units.Helpers;
 using Shouldly;
 using Xunit;
@@ -54,18 +54,18 @@ public class EndToEndPipelineTests(ITestOutputHelper output)
         }
     }
 
-    private class MultiplyStep : INotificationStep<TestNotification>
+    private class MultiplyTransform : INotificationTransform<TestNotification>
     {
-        public ValueTask<TestNotification> AggregateAsync(TestNotification notification, CancellationToken cancellationToken = default)
+        public ValueTask<TestNotification> TransformAsync(TestNotification notification, CancellationToken cancellationToken = default)
         {
             notification.Value *= 3;
             return ValueTask.FromResult(notification);
         }
     }
 
-    private class StatusStep : INotificationStep<TestNotification>
+    private class StatusTransform : INotificationTransform<TestNotification>
     {
-        public ValueTask<TestNotification> AggregateAsync(TestNotification notification, CancellationToken cancellationToken = default)
+        public ValueTask<TestNotification> TransformAsync(TestNotification notification, CancellationToken cancellationToken = default)
         {
             notification.Status = "Processed";
             return ValueTask.FromResult(notification);
@@ -98,8 +98,8 @@ public class EndToEndPipelineTests(ITestOutputHelper output)
                 sectorBuilder.AddMapper<SimpleMapper>();
                 sectorBuilder.WithPipeline(pipelineBuilder =>
                 {
-                    pipelineBuilder.AddStep<MultiplyStep>();
-                    pipelineBuilder.AddStep<StatusStep>();
+                    pipelineBuilder.AddStep<MultiplyTransform>();
+                    pipelineBuilder.AddStep<StatusTransform>();
                 });
                 sectorBuilder.AddExporter<CollectionExporter>();
             });

@@ -5,7 +5,7 @@ using Moq;
 using Notifliwy.Conditions.Interfaces;
 using Notifliwy.Exporters.Interfaces;
 using Notifliwy.Mapper.Interfaces;
-using Notifliwy.Steps.Interfaces;
+using Notifliwy.Transform.Interfaces;
 using Shouldly;
 using Xunit;
 
@@ -149,17 +149,17 @@ public class PipelineComponentsTests
         }
     }
 
-    public class NotificationStepTests
+    public class NotificationTransformTests
     {
         [Fact]
-        public async Task AggregateAsync_ShouldTransformNotification()
+        public async Task TransformAsync_ShouldTransformNotification()
         {
             // Arrange
-            var step = new MultiplyValueStep();
+            var transform = new MultiplyValueTransform();
             var notification = new TestNotification { Value = 10 };
 
             // Act
-            var result = await step.AggregateAsync(notification);
+            var result = await transform.TransformAsync(notification);
 
             // Assert
             result.ShouldNotBeNull();
@@ -167,10 +167,10 @@ public class PipelineComponentsTests
         }
 
         [Fact]
-        public async Task AggregateAsync_ShouldRespectCancellationToken()
+        public async Task TransformAsync_ShouldRespectCancellationToken()
         {
             // Arrange
-            var step = new CancellableStep();
+            var transform = new CancellableTransform();
             var notification = new TestNotification { Value = 10 };
             var cts = new CancellationTokenSource();
             cts.Cancel();
@@ -178,22 +178,22 @@ public class PipelineComponentsTests
             // Act & Assert
             await Should.ThrowAsync<OperationCanceledException>(async () =>
             {
-                await step.AggregateAsync(notification, cts.Token);
+                await transform.TransformAsync(notification, cts.Token);
             });
         }
 
-        private class MultiplyValueStep : INotificationStep<TestNotification>
+        private class MultiplyValueTransform : INotificationTransform<TestNotification>
         {
-            public ValueTask<TestNotification> AggregateAsync(TestNotification notification, CancellationToken cancellationToken = default)
+            public ValueTask<TestNotification> TransformAsync(TestNotification notification, CancellationToken cancellationToken = default)
             {
                 notification.Value *= 10;
                 return ValueTask.FromResult(notification);
             }
         }
 
-        private class CancellableStep : INotificationStep<TestNotification>
+        private class CancellableTransform : INotificationTransform<TestNotification>
         {
-            public ValueTask<TestNotification> AggregateAsync(TestNotification notification, CancellationToken cancellationToken = default)
+            public ValueTask<TestNotification> TransformAsync(TestNotification notification, CancellationToken cancellationToken = default)
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 return ValueTask.FromResult(notification);

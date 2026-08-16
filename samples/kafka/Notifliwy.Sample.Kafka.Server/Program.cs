@@ -72,11 +72,11 @@ builder.Services.AddNotifliwyServer(serverBuilder =>
         sectorBuilder.AddMapper<CatMeowMapper>();
         sectorBuilder.AddCondition<CatMeowCondition>();
 
-        // Pipelines chain: each step sees the previous result (see GH #9 for future fan-out design).
+        // Pipelines chain: each transform sees the previous result (see GH #9 for future fan-out design).
         sectorBuilder.WithPipeline(pipelineBuilder =>
         {
-            pipelineBuilder.AddStep<ColorNotificationStep>();
-            pipelineBuilder.AddStep<ConstantColorNotificationStep>();
+            pipelineBuilder.AddStep<ColorNotificationTransform>();
+            pipelineBuilder.AddStep<ConstantColorNotificationTransform>();
         });
 
         sectorBuilder.AddExporter<CatNotificationConsoleExporter>();

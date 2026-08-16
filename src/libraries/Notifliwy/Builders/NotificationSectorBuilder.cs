@@ -66,7 +66,7 @@ public class NotificationSectorBuilder<TNotification, TEvent>(IServiceCollection
     internal IList<PipelineBuilder<TNotification>> StagesBuilders { get; } = [];
 
     /// <summary>
-    /// Configure pipeline with <see cref="INotificationStep{TNotification}"/>
+    /// Configure pipeline with <see cref="INotificationTransform{TNotification}"/>
     /// </summary>
     public NotificationSectorBuilder<TNotification, TEvent> WithPipeline(
         Action<PipelineBuilder<TNotification>> pipelineBuilder)

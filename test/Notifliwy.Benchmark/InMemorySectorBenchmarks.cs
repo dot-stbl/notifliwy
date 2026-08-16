@@ -7,7 +7,7 @@ using Notifliwy.Contexts.Interfaces;
 using Notifliwy.Dependency;
 using Notifliwy.Exporters.Interfaces;
 using Notifliwy.Mapper.Interfaces;
-using Notifliwy.Steps.Interfaces;
+using Notifliwy.Transform.Interfaces;
 
 namespace Notifliwy.Benchmark;
 
@@ -58,12 +58,12 @@ public sealed class BenchmarkMapper : INotificationMapper<BenchmarkNotification,
 }
 
 /// <summary>
-/// Pipeline step that passes the notification through untouched
+/// Pipeline transform that passes the notification through untouched
 /// </summary>
-public sealed class BenchmarkStep : INotificationStep<BenchmarkNotification>
+public sealed class BenchmarkTransform : INotificationTransform<BenchmarkNotification>
 {
     /// <inheritdoc />
-    public ValueTask<BenchmarkNotification> AggregateAsync(BenchmarkNotification notification, CancellationToken cancellationToken = default)
+    public ValueTask<BenchmarkNotification> TransformAsync(BenchmarkNotification notification, CancellationToken cancellationToken = default)
     {
         return ValueTask.FromResult(notification);
     }
@@ -93,7 +93,7 @@ public class InMemorySectorBenchmarks
     private BenchmarkEvent inputEvent = null!;
 
     /// <summary>
-    /// Build a server with one sector: single condition, mapper, step and exporter
+    /// Build a server with one sector: single condition, mapper, transform and exporter
     /// </summary>
     [GlobalSetup]
     public void Setup()
@@ -107,7 +107,7 @@ public class InMemorySectorBenchmarks
             {
                 sectorBuilder.AddCondition<AllowAllCondition>();
                 sectorBuilder.AddMapper<BenchmarkMapper>();
-                sectorBuilder.WithPipeline(pipelineBuilder => pipelineBuilder.AddStep<BenchmarkStep>());
+                sectorBuilder.WithPipeline(pipelineBuilder => pipelineBuilder.AddStep<BenchmarkTransform>());
                 sectorBuilder.AddExporter<NoOpExporter>();
             });
         });

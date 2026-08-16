@@ -3,21 +3,22 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Notifliwy.Extensions;
+using Notifliwy.Transform.Interfaces;
 
 namespace Notifliwy.Steps.Interfaces;
 
 /// <summary>
-/// Assigned notification pipeline with <see cref="INotificationStep{TNotification}"/>'s
+/// Assigned notification pipeline with <see cref="INotificationTransform{TNotification}"/>'s
 /// </summary>
 public interface INotificationPipeline<TNotification>
 {
     /// <summary>
-    /// Assigned steps
+    /// Assigned transforms
     /// </summary>
-    public IReadOnlyCollection<INotificationStep<TNotification>> CurrentSteps { get; }
+    public IReadOnlyCollection<INotificationTransform<TNotification>> CurrentTransforms { get; }
 
     /// <summary>
-    /// Invoke pipeline processing by <see cref="CurrentSteps"/>
+    /// Invoke pipeline processing by <see cref="CurrentTransforms"/>
     /// </summary>
     public ValueTask<TNotification> InvokePipeline(
         TNotification notification,
@@ -30,32 +31,32 @@ public interface INotificationPipeline<TNotification>
 public class NotificationPipeline<TNotification> : INotificationPipeline<TNotification>
 {
     /// <summary>
-    /// Compile default action by <paramref name="currentSteps"/>
+    /// Compile default action by <paramref name="currentTransforms"/>
     /// </summary>
-    /// <param name="currentSteps"></param>
-    public NotificationPipeline(INotificationStep<TNotification>[] currentSteps)
+    /// <param name="currentTransforms"></param>
+    public NotificationPipeline(INotificationTransform<TNotification>[] currentTransforms)
     {
-        CurrentSteps = currentSteps;
+        CurrentTransforms = currentTransforms;
 
-        if (currentSteps.Length == 0)
+        if (currentTransforms.Length == 0)
         {
             CompiledPipeline = (notification, _) => new ValueTask<TNotification>(notification);
         }
         else
         {
             CompiledPipeline = (notification, token) =>
-                CurrentSteps.AggregateAsync(
+                CurrentTransforms.AggregateAsync(
                     notification,
-                    (aggregateNotification, step) =>
-                        step.AggregateAsync(aggregateNotification, token));
+                    (aggregateNotification, transform) =>
+                        transform.TransformAsync(aggregateNotification, token));
         }
     }
 
     /// <inheritdoc />
-    public IReadOnlyCollection<INotificationStep<TNotification>> CurrentSteps { get; }
+    public IReadOnlyCollection<INotificationTransform<TNotification>> CurrentTransforms { get; }
 
     /// <summary>
-    /// Compiled function for <see cref="INotificationStep{TNotification}"/>
+    /// Compiled function for <see cref="INotificationTransform{TNotification}"/>
     /// </summary>
     internal Func<TNotification, CancellationToken, ValueTask<TNotification>> CompiledPipeline { get; init; }
 

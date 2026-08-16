@@ -5,6 +5,7 @@ using Notifliwy.Conditions.Interfaces;
 using Notifliwy.Exporters.Interfaces;
 using Notifliwy.Mapper.Interfaces;
 using Notifliwy.Steps.Interfaces;
+using Notifliwy.Transform.Interfaces;
 
 namespace Notifliwy.Extensions.Dependency;
 
@@ -21,7 +22,8 @@ internal static class ServiceProviderExtensions
     }
 
     /// <summary>
-    /// Return all assigned <see cref="INotificationStep{TNotification}"/>
+    /// Return all assigned <see cref="INotificationPipeline{TNotification}"/> with their
+    /// <see cref="INotificationTransform{TNotification}"/> transforms
     /// </summary>
     public static IEnumerable<INotificationPipeline<TNotification>> PipelinesBy<TNotification>(
         this IServiceProvider serviceProvider)

@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using Notifliwy.Transform.Interfaces;
 
 namespace Notifliwy.Mapper.Interfaces;
 
@@ -7,7 +8,7 @@ namespace Notifliwy.Mapper.Interfaces;
 /// Defines a contract for converting events to notifications.
 /// The mapper is the required stage in every notification pipeline - all events
 /// must be converted to a notification before they can be processed by
-/// <see cref="INotificationStep{TNotification}"/> steps and
+/// <see cref="INotificationTransform{TNotification}"/> transforms and
 /// <see cref="INotificationExporter{TNotification}"/> exporters.
 /// </summary>
 /// <typeparam name="TNotification">The resulting notification type</typeparam>
@@ -33,8 +34,8 @@ namespace Notifliwy.Mapper.Interfaces;
 /// the event is filtered out and the mapper is not called.</para>
 /// <para>Implementations should be lightweight and fast, as they are called
 /// for every event that passes through conditions.</para>
-/// <para>Complex transformations should be handled in <see cref="INotificationStep{TNotification}"/>
-/// components rather than in the mapper.</para>
+    /// <para>Complex transformations should be handled in <see cref="INotificationTransform{TNotification}"/>
+    /// components rather than in the mapper.</para>
 /// </remarks>
 public interface INotificationMapper<TNotification, in TEvent>
 {
