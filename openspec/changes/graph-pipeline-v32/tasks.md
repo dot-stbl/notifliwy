@@ -23,9 +23,9 @@
 
 ## 4. Mapping providers
 
-- [ ] 4.1 `Notifliwy.Mapping.Mapperly` adapter package (blessed)
-- [ ] 4.2 `Notifliwy.Mapping.Mapster` adapter package
-- [ ] 4.3 Docs: when to use provider vs lambda `Map`
+- [x] 4.1 `Notifliwy.Mapping.Mapperly` adapter package (blessed)
+- [x] 4.2 `Notifliwy.Mapping.Mapster` adapter package
+- [x] 4.3 Docs: when to use provider vs lambda `Map`
 
 ## 5. Tests (M3 coverage requirement)
 
