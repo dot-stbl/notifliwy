@@ -1,253 +1,171 @@
-# Notifliwy — Full Documentation
+# Notifliwy — Architecture Reference
 
-## Overview
-
-Notifliwy is a .NET library for event-driven architecture that implements a **pipeline-based event processing pattern**. It converts incoming events to notifications through configurable stages using a fluent builder API.
-
----
-
-## Architecture Deep-Dive
-
-### Pipeline Flow
-
-```
-Event → InputPipe → Connector → Sector → Condition → Mapper → Steps → Exporter
-```
-
-Each stage has a specific responsibility:
-
-| Stage | Interface | Purpose | Required |
-|-------|-----------|---------|----------|
-| **Input** | `IInputPipe<TEvent>` | Provides `IAsyncEnumerable<TEvent>` via `AcceptAsync()` | Yes |
-| **Condition** | `INotificationCondition<TN, TE>` | Optional filter — pipeline stops if returns `false` | No |
-| **Mapper** | `INotificationMapper<TN, TE>` | Required converter — transforms event to notification | **Yes** |
-| **Steps** | `INotificationStep<TN>` | Optional transforms (multiple run sequentially) | No |
-| **Exporter** | `INotificationExporter<TN>` | Final output handler | No |
-
-### Component Responsibilities
-
-**NotificationServerBuilder**
-- Root builder for DI registration
-- Entry point: `AddNotifliwyServer()`
-
-**NotificationSectorBuilder**
-- Configures mapping for a specific `TEvent` → `TNotification`
-- Methods: `AddCondition()`, `AddMapper()`, `WithPipeline()`, `AddExporter()`
-
-**NotificationSector**
-- Executes when event passes through the connector
-- Creates DI scope and delegates to SectorBlock
-
-**SectorBlock**
-- Holds resolved instances of all pipeline components
-- Orchestrates the actual processing flow
-
-**NotificationConnector**
-- Background service (`BackgroundService`)
-- Bridges `IInputPipe` to all registered sectors
-- Uses `Parallel.ForEachAsync` for concurrent sector processing
-
-### Processing Model
-
-- **Sectors process events in parallel** — multiple sectors can handle the same event concurrently
-- **Pipelines within a sector run sequentially and chain** — the notification returned by one pipeline is the input to the next (see #9 for the discussion on intended behavior)
-- **Each event gets its own DI scope** — ensures fresh instances per event
+Notifliwy converts incoming events into notifications through a **typed sector graph**:
+`When → Map → (Transform | Branch | Join | Custom | Export)*`, described by sector
+configuration classes and executed by a hosted connector. This is the 3.2 surface;
+for the removed 3.1 fluent API and every mapping from it, see
+[MIGRATION-3.2.md](MIGRATION-3.2.md). For the tour and package table, see the
+[README](../README.md).
 
 ---
 
-## Usage Patterns
+## Pipeline Flow
 
-### Minimal Setup
+```
+Event → InputPipe → Connector → Sector → SectorGraphExecutor
+                                        ├─ When conditions (all must allow)
+                                        ├─ Map (exactly one)
+                                        └─ node walk: Transform | Branch ⇉ Join | Custom | Export
+```
+
+## Graph Nodes
+
+| Node | Interface | Method | Rules |
+|------|-----------|--------|-------|
+| **Input** | `IInputPipe<TEvent>` | `AcceptAsync()` | transport; `AddInMemoryInput()` or a provider |
+| **When** | `INotificationCondition<TN, TE>` | `AllowItAsync(event)` | optional filter on the raw event; before `Map`; all must allow |
+| **Map** | `INotificationMapper<TN, TE>` | `ConvertAsync(event)` | **required**, exactly once, before every other node |
+| **Transform** | `INotificationTransform<TN>` | `TransformAsync(notif)` | sequential on the path, each receives the previous output |
+| **Branch** | sub-graphs of the same builder | — | parallel fan-out under a `BranchPolicy` |
+| **Join** | `INotificationJoin<TN>` | `JoinAsync(IReadOnlyList<TN>)` | reduces branch outputs; single-branch join is a passthrough |
+| **Custom** | `INotificationCustom<TN>` | `InvokeAsync(notif)` | escape hatch for transform-shaped behaviour |
+| **Export** | `INotificationExporter<TN>` | `ThrowAsync(notif)` | delivery at the current path position; serial in order |
+
+`Map` and `Custom` also accept inline lambdas. The graph is acyclic by construction;
+the frozen plan is validated when built: exactly one `Map`, `When` before `Map`,
+`Join` only after a `Branch`, and every branch sub-graph terminates with at least
+one `Export`.
+
+## Registration Surfaces
+
+**Config class (primary):**
 
 ```csharp
-builder.Services.AddNotifliwyServer(serverBuilder =>
+public class PaymentSector : INotificationSectorConfig<PaymentAlert, PaymentFailed>
 {
-    serverBuilder.AddNotification<NeedNotification, InputEvent>(sectorBuilder =>
+    public void Configure(ISectorGraphBuilder<PaymentAlert, PaymentFailed> graph)
     {
-        sectorBuilder.AddMapper<InputNeedNotificationMapper>(); // Required!
-    });
-
-    serverBuilder.AddInMemoryInput(); // Built-in in-memory provider
-});
-```
-
-### Full Pipeline Setup
-
-```csharp
-serverBuilder.AddNotification<MyNotification, MyEvent>(sectorBuilder =>
-{
-    sectorBuilder.AddCondition<MyCondition>();       // Optional filter
-    sectorBuilder.AddMapper<MyMapper>();              // Required
-    sectorBuilder.WithPipeline(pipelineBuilder =>    // Optional steps
-    {
-        pipelineBuilder.AddStep<Step1>();
-        pipelineBuilder.AddStep<Step2>();
-    });
-    sectorBuilder.AddExporter<MyExporter>();       // Final output
-});
-```
-
-### Multiple Exporters (Fan-Out)
-
-Multiple exporters receive the same notification:
-
-```csharp
-sectorBuilder.AddExporter<EmailExporter>();
-sectorBuilder.AddExporter<SmsExporter>();
-sectorBuilder.AddExporter<WebhookExporter>();
-```
-
-### Multiple Sectors (Same Event)
-
-One event can trigger multiple notifications:
-
-```csharp
-serverBuilder.AddNotification<EmailNotification, OrderEvent>(sector => {
-    sector.AddMapper<OrderToEmailMapper>();
-    sector.AddExporter<EmailExporter>();
-});
-
-serverBuilder.AddNotification<SmsNotification, OrderEvent>(sector => {
-    sector.AddMapper<OrderToSmsMapper>();
-    sector.AddExporter<SmsExporter>();
-});
-```
-
----
-
-## Component Implementation Guide
-
-### Condition (Optional Filter)
-
-Stops pipeline if `AllowItAsync` returns `false`:
-
-```csharp
-public sealed class EvenNumberCondition : INotificationCondition<Notification, Event>
-{
-    public ValueTask<bool> AllowItAsync(Event input, CancellationToken cancellationToken = default)
-    {
-        return ValueTask.FromResult(input.Value % 2 == 0);
+        graph
+            .When<AfterThirdAttempt>()
+            .Map<PaymentAlertMapper>()
+            .Transform<EnrichmentTransform>()
+            .Export<EmailExporter>();
     }
 }
+
+serverBuilder.AddSector<PaymentSector>();
 ```
 
-### Mapper (Required Converter)
+Config classes are transient DI services — constructor dependencies (options,
+clients) are injected when the graph is materialized. Sector-level options:
+`SectorExecution Execution` (default `Auto`) and `BranchPolicy? DefaultBranchPolicy`
+(default `null` → `FailFast`).
 
-```csharp
-public sealed class EventToNotificationMapper : INotificationMapper<Notification, Event>
-{
-    public ValueTask<Notification> ConvertAsync(Event input, CancellationToken cancellationToken = default)
-    {
-        return ValueTask.FromResult(new Notification
-        {
-            Value = input.Value * 2,
-            ProcessedAt = DateTimeOffset.UtcNow
-        });
-    }
-}
-```
+**Inline one-off:** `serverBuilder.AddSector<TNotification, TEvent>(graph => …)` —
+built and validated at registration time.
 
-### Step (Optional Transform)
+**Assembly discovery:** `[assembly: NotifliwySectors]` marks an assembly; the source
+generator (shipped inside the `Notifliwy` package) emits
+`Notifliwy.Generated.NotifliwySectorsRegistration.AddNotifliwySectors(serverBuilder)`
+with one direct `AddSector<TConfig>()` per concrete, closed, visible config class.
+The opt-in runtime fallback `AddSectorsFromAssembly(assembly)` discovers public
+config classes by reflection and logs a startup warning.
 
-Multiple steps execute sequentially:
+## Execution Modes
 
-```csharp
-public sealed class EnrichmentStep : INotificationStep<Notification>
-{
-    public ValueTask<Notification> AggregateAsync(Notification notification, CancellationToken cancellationToken = default)
-    {
-        notification.Metadata["enriched"] = "true";
-        return ValueTask.FromResult(notification);
-    }
-}
-```
+`SectorGraphExecutor` (internal) walks the same plan on one of two paths, selected
+at startup:
 
-### Exporter (Final Output)
+- **Compiled** — every node resolved or constructed once at startup, direct
+  invokes, no per-event DI scope. A node is *compile-safe* when it is
+  singleton-registered, transient with singleton-safe dependencies, or stateless
+  with a public parameterless constructor.
+- **Scoped** — fresh DI scope per event; every node resolved from it.
 
-```csharp
-public sealed class ConsoleExporter : INotificationExporter<Notification>
-{
-    public ValueTask ThrowAsync(Notification notification, CancellationToken cancellationToken = default)
-    {
-        Console.WriteLine($"Notification: {notification.Value}");
-        return ValueTask.CompletedTask;
-    }
-}
-```
+`SectorExecution`:
 
----
+| Mode | Behaviour |
+|------|-----------|
+| `Auto` (default) | compiled when every node is compile-safe; otherwise scoped with a logged reason |
+| `Compiled` | forces the compiled path; fails fast at startup with `SectorCaptiveDependencyException` on scoped/unprovable nodes |
+| `Scoped` | always per-event scope |
 
-## Providers & Packages
+## Branch and Join Semantics
 
-### Built-in Provider
+- `Branch(policy?, params branches)` fans the **same notification instance** out to
+  parallel sub-graphs that share the per-event DI scope. Transforms and custom nodes
+  must **return new instances instead of mutating** — mutation leaks across branches.
+- `BranchPolicy.FailFast` (default) — the first fault rethrows after all branches are
+  observed. `BranchPolicy.BestEffort` — failed branches are logged and skipped; a
+  following `Join` receives only the survivors.
+- The main-path notification between a `Branch` and a `Join` stays the **pre-branch
+  input**; without a `Join`, downstream nodes continue with what the fan-out received.
+- `Join<TJoin>()` reduces branch outputs in registration order; a single surviving
+  branch is a passthrough (the reducer is not invoked).
 
-| Provider | Description |
-|----------|-------------|
-| In-Memory | Uses `System.Threading.Channels`, added via `AddInMemoryInput()` |
+## Mapping Providers
 
-### External Packages
+The core is mapper-agnostic; two adapter packages plug external mappers into a `Map`
+node:
 
-| Package | Version | Description |
-|---------|---------|-------------|
-| `Notifliwy.Provider.MassTransit.Kafka` | 3.1.0 | Kafka consumer via MassTransit |
-| `Notifliwy.OpenTelemetry.Instrumentation` | 3.0.0 | OpenTelemetry tracing/metrics |
+| Package | Shape |
+|---------|-------|
+| `Notifliwy.Mapping.Mapperly` | `IMapperlyNotificationMapping<TN, TE>` bridge contract implemented by a `[Mapper]` partial class; `MapperlyNotificationMapper<TN, TE, TMapper>` adapts it; `AddNotifliwyMapperlyMapping<TN, TE, TMapper>()` registers it |
+| `Notifliwy.Mapping.Mapster` | `MapsterNotificationMapper<TN, TE>(TypeAdapterConfig)` compiles the Mapster delegate once; `AddNotifliwyMapsterMapping(...)` registers it |
 
----
+When to use which: an inline lambda for one-liners, a hand-written
+`INotificationMapper` class for real logic, an adapter package when the mapping
+already exists (or should be source-generated) in Mapperly or Mapster shape.
+
+## Processing Model
+
+- **Sectors process events in parallel** — `Parallel.ForEachAsync`,
+  `MaxDegreeOfParallelism = ProcessorCount`; each sector in its own DI scope
+- **Nodes on a path run sequentially** in registration order; branch sub-graphs run
+  in parallel
+- Failures inside a sector are caught in `NotificationSector`, recorded on the span,
+  logged, and the event is dropped (no retry / dead-letter; branch failures follow
+  the `BranchPolicy`)
 
 ## Observability
 
-### Activity Tracing
+Spans (`ActivitySource`): `notifliwy.connector` per event taken off the pipe,
+`notifliwy.transaction.sector` per sector pass, tagged with `event.type` and
+`notification.type`. Metrics (`Notifliwy.Server` meter):
+`notifliwy.server.event.count`, `notifliwy.server.sector.count`.
+
+Wire-up:
 
 ```csharp
-using var activity = DiagnosticActivity.NotifliwySource.StartConnectorActivity<TEvent>();
-activity?.SetStatus(ActivityStatusCode.Error);
-activity.RecordException(exception);
+builder.Services.AddOpenTelemetry()
+    .WithTracing(tracing => tracing.AddNotifliwyServerInstrumentation())
+    .WithMetrics(metrics => metrics.AddMeter("Notifliwy.Server"));
 ```
-
-### Metrics
-
-```csharp
-DiagnosticMeter.InputCounter.Add(delta: 1, tagList: DiagnosticEventData<TEvent>.TagsBy);
-```
-
-Available metrics:
-- `notifliwy.server.event.count` — Number of events accepted
-- `notifliwy.server.sector.count` — Number of events with final notification processing
-
----
 
 ## Known Issues
 
-See [docs/BUGS.md](docs/BUGS.md) for detailed bug reports and fix status.
-
-| Bug | Severity | Status |
-|----|----------|--------|
-| #1 MultiplyServiceInstance.CheckoutInstanceAsync calls multiplyAction after singleAction | High | FIXED |
-| #2 Fire-and-forget Task.Run in NotificationConnector | Medium | RESOLVED (connector rewritten to awaited `Parallel.ForEachAsync`) |
-| #3 Duplicate ConnectorsBuilder for same TEvent | Low | NOT A BUG (by design) |
-| #4 EnumerableExtensions.AggregateAsync uses Task instead of ValueTask | Medium | FIXED |
-
-**No open items** — see [docs/BUGS.md](docs/BUGS.md) for details.
-
----
+See [BUGS.md](BUGS.md) — **no open items**; everything recorded there is fixed or
+documented as intentional design.
 
 ## Key Files Reference
 
 | File | Purpose |
 |------|---------|
-| `src/libraries/Notifliwy/Builders/NotificationServerBuilder.cs` | Root builder for DI registration |
-| `src/libraries/Notifliwy/Builders/NotificationSectorBuilder.cs` | Per-notification configuration |
+| `src/libraries/Notifliwy/Builders/NotificationServerBuilder.cs` | `AddSector` / `AddSectorsFromAssembly` / `AddInMemoryInput` |
+| `src/libraries/Notifliwy/Graph/Interfaces/ISectorGraphBuilder.cs` | Graph builder contract (When/Map/Transform/Branch/Join/Custom/Export) |
+| `src/libraries/Notifliwy/Graph/Internals/SectorGraphExecutor.cs` | Plan execution: compiled + scoped paths, branch policies |
+| `src/libraries/Notifliwy/Graph/Internals/SectorGraphCompiler.cs` | Compiled-path selection, compile-safe node analysis |
+| `src/libraries/Notifliwy/Graph/Internals/SectorGraphValidator.cs` | Startup graph validation |
+| `src/libraries/Notifliwy/Config/Interfaces/INotificationSectorConfig.cs` | Config-class contract, `Execution`, `DefaultBranchPolicy` |
+| `src/libraries/Notifliwy/Config/NotifliwySectorsAttribute.cs` | `[assembly: NotifliwySectors]` marker |
+| `src/generators/Notifliwy.Generators/NotifliwySectorsRegistrationGenerator.cs` | Source generator emitting `AddNotifliwySectors()` |
 | `src/libraries/Notifliwy/Connectors/NotificationConnector.cs` | Background event processor |
-| `src/libraries/Notifliwy/Contexts/NotificationSector.cs` | Event-to-notification mapper |
-| `src/libraries/Notifliwy/Contexts/SectorBlock.cs` | Pipeline orchestration |
-| `src/libraries/Notifliwy/Pipes/InMemory/InMemoryInputPipe.cs` | In-memory event source |
-| `src/libraries/Notifliwy/Pipes/InMemory/InMemoryExportPipe.cs` | In-memory event export |
-| `src/libraries/Notifliwy/Pipes/InMemory/InMemoryEventExchange.cs` | Channel-based queue |
-| `src/libraries/Notifliwy/Related/MultiplyServiceInstance.cs` | Multi-instance service holder |
+| `src/libraries/Notifliwy/Contexts/NotificationSector.cs` | Per-event scope, error handling, tracing |
+| `src/libraries/Notifliwy/Pipes/InMemory/*` | Channel-based in-memory transport |
+| `src/mapping/Notifliwy.Mapping.Mapperly/*` | Mapperly adapter package |
+| `src/mapping/Notifliwy.Mapping.Mapster/*` | Mapster adapter package |
 | `src/libraries/Notifliwy/Diagnostic/DiagnosticActivity.cs` | Activity source for tracing |
 | `src/libraries/Notifliwy/Diagnostic/DiagnosticMeter.cs` | Metrics meter |
-
----
 
 ## Commands
 
@@ -255,35 +173,28 @@ See [docs/BUGS.md](docs/BUGS.md) for detailed bug reports and fix status.
 # Build the solution
 dotnet build notifliwy.sln
 
-# Run all unit tests
+# Run core unit tests
 dotnet test test/Notifliwy.Units
 
-# Run tests with coverage
-dotnet test test/Notifliwy.Units --collect:"XPlat Code Coverage"
+# Source generator + mapping adapter tests
+dotnet test test/Notifliwy.Generators.Tests
+dotnet test test/Notifliwy.Mapping.Tests
 
-# Run a single test
-dotnet test test/Notifliwy.Units --filter "FullyQualifiedName~TestName"
-
-# Run benchmarks
+# Run benchmarks (see CLAUDE.md for the Release-artifacts note)
 dotnet run --project test/Notifliwy.Benchmark
 
-# Run in-memory sample
+# Run in-memory sample (branch + join graph, generated registration)
 dotnet run --project samples/inmemory/Notifliwy.Sample.InMemory
 
-# Run Kafka sample (requires Kafka cluster)
+# Run Kafka sample (two-branch BestEffort graph)
 docker-compose -f deploy/sample-kafka-compose.yml up -d
 dotnet run --project samples/kafka/Notifliwy.Sample.Kafka.Server
 dotnet run --project samples/kafka/Notifliwy.Sample.Kafka.Sender
 ```
 
----
-
 ## Development Rules
 
-Coding standards are defined in [`.claude/rules/`](.claude/rules/):
-
-- [naming.md](.claude/rules/naming.md) — Naming conventions
-- [patterns.md](.claude/rules/patterns.md) — Primary constructors, pattern matching
-- [xml-docs.md](.claude/rules/xml-docs.md) — XML documentation
-- [logging.md](.claude/rules/logging.md) — Structured logging
-- [result.md](.claude/rules/result.md) — Result<T> pattern
+Coding standards are defined in [`.claude/rules/`](../.claude/rules/):
+[naming](../.claude/rules/naming.md), [patterns](../.claude/rules/patterns.md),
+[xml-docs](../.claude/rules/xml-docs.md), [logging](../.claude/rules/logging.md),
+[result](../.claude/rules/result.md).

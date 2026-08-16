@@ -1,0 +1,55 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Nullable>enable</Nullable>
+        <LangVersion>latest</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <TargetFramework>net8.0</TargetFramework>
+        <PackageIcon>icon.main.provider.png</PackageIcon>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Mapster" Version="7.4.0"/>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\libraries\Notifliwy\Notifliwy.csproj"/>
+    </ItemGroup>
+
+    <PropertyGroup>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <Description>Mapster runtime mapping adapter for Notifliwy notification mappers, for consumers with existing TypeAdapterConfig rules</Description>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Content Include="README.md">
+            <Link>README.md</Link>
+            <Pack>True</Pack>
+            <PackagePath/>
+        </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="..\..\..\contents\icon.main.provider.png">
+            <Pack>True</Pack>
+            <PackagePath/>
+            <Link>icon.main.provider.png</Link>
+        </None>
+    </ItemGroup>
+
+    <PropertyGroup>
+        <Version>3.2.0</Version>
+        <FileVersion>$(Version)</FileVersion>
+        <AssemblyVersion>$(Version)</AssemblyVersion>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+    </PropertyGroup>
+
+</Project>

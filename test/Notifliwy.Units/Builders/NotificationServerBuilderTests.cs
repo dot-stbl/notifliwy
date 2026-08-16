@@ -3,7 +3,6 @@ using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Notifliwy.Builders;
-using Notifliwy.Builders.Internals.Interfaces;
 using Notifliwy.Pipes.InMemory.Interfaces;
 using Notifliwy.Pipes.InMemory.Options;
 using Notifliwy.Pipes.Interfaces;
@@ -39,38 +38,6 @@ public class NotificationServerBuilderTests
         // Assert
         builder.ShouldNotBeNull();
         builder.ShouldBeOfType<NotificationServerBuilder>();
-    }
-
-    [Fact]
-    public void AddNotification_ShouldAddSectorBuilder()
-    {
-        // Arrange
-        var services = new ServiceCollection();
-        var builder = NotificationServerBuilder.CreateInstance(services);
-
-        // Act
-        builder.AddNotification<TestNotification, TestEvent>();
-
-        // Assert
-        services.ShouldNotBeNull();
-    }
-
-    [Fact]
-    public void AddNotification_WithAction_ShouldInvokeSectorBuilderAction()
-    {
-        // Arrange
-        var services = new ServiceCollection();
-        var builder = NotificationServerBuilder.CreateInstance(services);
-        var actionInvoked = false;
-
-        // Act
-        builder.AddNotification<TestNotification, TestEvent>(sectorBuilder =>
-        {
-            actionInvoked = true;
-        });
-
-        // Assert
-        actionInvoked.ShouldBeTrue();
     }
 
     [Fact]
@@ -166,72 +133,6 @@ public class NotificationServerBuilderTests
         freedEvent.Value.ShouldBe(1);
 
         await pendingWrite;
-    }
-
-
-    [Fact]
-    public void AddNotification_ShouldRegisterNotificationMappings()
-    {
-        // Arrange
-        var services = new ServiceCollection();
-        var builder = NotificationServerBuilder.CreateInstance(services);
-
-        // Act
-        builder.AddNotification<TestNotification, TestEvent>();
-
-        // Assert
-        services.ShouldNotBeNull();
-        // Verify no exceptions thrown during registration
-    }
-
-    [Fact]
-    public void BuildServer_ShouldRegisterConnectors()
-    {
-        // Arrange
-        var services = new ServiceCollection();
-        var builder = NotificationServerBuilder.CreateInstance(services);
-
-        builder.AddNotification<TestNotification, TestEvent>();
-
-        // Act
-        builder.BuildServer();
-        var serviceProvider = services.BuildServiceProvider();
-
-        // Assert
-        // Verify service collection was built successfully
-        services.Count.ShouldBeGreaterThan(0);
-    }
-
-    [Fact]
-    public void AddNotification_ShouldSupportMultipleNotifications()
-    {
-        // Arrange
-        var services = new ServiceCollection();
-        var builder = NotificationServerBuilder.CreateInstance(services);
-
-        // Act
-        builder.AddNotification<TestNotification, TestEvent>();
-        builder.AddNotification<TestNotification, TestEvent>();
-
-        // Assert
-        services.ShouldNotBeNull();
-    }
-
-    [Fact]
-    public void AddNotification_WithDifferentEventTypes_ShouldRegisterCorrectly()
-    {
-        // Arrange
-        var services = new ServiceCollection();
-        var builder = NotificationServerBuilder.CreateInstance(services);
-
-        // Act
-        builder.AddNotification<TestNotification, TestEvent>();
-        builder.AddInMemoryInput();
-
-        // Assert
-        var serviceProvider = services.BuildServiceProvider();
-        var inputPipe = serviceProvider.GetService<IInputPipe<TestEvent>>();
-        inputPipe.ShouldNotBeNull();
     }
 
     [Fact]

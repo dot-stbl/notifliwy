@@ -67,21 +67,7 @@ builder.Services.AddMassTransit(configurator =>
 
 builder.Services.AddNotifliwyServer(serverBuilder =>
 {
-    serverBuilder.AddNotification<CatMeowNotification, CatMeowEvent>(sectorBuilder =>
-    {
-        sectorBuilder.AddMapper<CatMeowMapper>();
-        sectorBuilder.AddCondition<CatMeowCondition>();
-
-        // Pipelines chain: each step sees the previous result (see GH #9 for future fan-out design).
-        sectorBuilder.WithPipeline(pipelineBuilder =>
-        {
-            pipelineBuilder.AddStep<ColorNotificationStep>();
-            pipelineBuilder.AddStep<ConstantColorNotificationStep>();
-        });
-
-        sectorBuilder.AddExporter<CatNotificationConsoleExporter>();
-        sectorBuilder.AddExporter<CatNotificationDatabaseExporter>();
-    });
+    serverBuilder.AddSector<CatMeowSector>();
 });
 
 builder.Services.AddOpenTelemetry()

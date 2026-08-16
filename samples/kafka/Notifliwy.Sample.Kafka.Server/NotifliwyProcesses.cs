@@ -3,7 +3,7 @@ using Notifliwy.Conditions.Interfaces;
 using Notifliwy.Exporters.Interfaces;
 using Notifliwy.Extensions.System;
 using Notifliwy.Mapper.Interfaces;
-using Notifliwy.Steps.Interfaces;
+using Notifliwy.Transform.Interfaces;
 
 namespace Notifliwy.Sample.Kafka.Server;
 
@@ -37,10 +37,10 @@ public class CatMeowMapper : INotificationMapper<CatMeowNotification, CatMeowEve
 #region Pipeline
 
 /// <inheritdoc />
-public class ColorNotificationStep : INotificationStep<CatMeowNotification>
+public class ColorNotificationTransform : INotificationTransform<CatMeowNotification>
 {
     /// <inheritdoc />
-    public ValueTask<CatMeowNotification> AggregateAsync(
+    public ValueTask<CatMeowNotification> TransformAsync(
         CatMeowNotification notification,
         CancellationToken cancellationToken = default)
     {
@@ -51,10 +51,10 @@ public class ColorNotificationStep : INotificationStep<CatMeowNotification>
 }
 
 /// <inheritdoc />
-public class ConstantColorNotificationStep : INotificationStep<CatMeowNotification>
+public class ConstantColorNotificationTransform : INotificationTransform<CatMeowNotification>
 {
     /// <inheritdoc />
-    public ValueTask<CatMeowNotification> AggregateAsync(
+    public ValueTask<CatMeowNotification> TransformAsync(
         CatMeowNotification notification,
         CancellationToken cancellationToken = default)
     {
