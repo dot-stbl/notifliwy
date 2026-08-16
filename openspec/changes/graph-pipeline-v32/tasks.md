@@ -9,10 +9,10 @@
 
 ## 2. Registration surface
 
-- [ ] 2.1 `INotificationSectorConfig<TNotification, TEvent>` + `AddSector<TConfig>()`
-- [ ] 2.2 Inline `AddSector<TNotification, TEvent>(g => …)`
-- [ ] 2.3 Remove 3.1 fluent sector API + multi-WithPipeline (V3)
-- [ ] 2.4 `docs/MIGRATION-3.2.md` mapping every removed call to graph equivalent
+- [x] 2.1 `INotificationSectorConfig<TNotification, TEvent>` + `AddSector<TConfig>()`
+- [x] 2.2 Inline `AddSector<TNotification, TEvent>(g => …)`
+- [x] 2.3 Remove 3.1 fluent sector API + multi-WithPipeline (V3)
+- [x] 2.4 `docs/MIGRATION-3.2.md` mapping every removed call to graph equivalent
 
 ## 3. Source generators
 
