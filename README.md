@@ -224,11 +224,18 @@ The Kafka sample ships a Jaeger container for exactly this:
 
 **Failures are logged, not retried.** An exception anywhere inside a sector — condition, mapper, step or exporter — is caught in `NotificationSector`, recorded on the span and written to the log; the event is then dropped. There is no retry and no dead-letter path. Put retries inside the exporter, or consume through MassTransit and let its middleware own them.
 
-**A sector needs at least one condition.** `SectorBlock` asks the condition set for a verdict before anything else runs, and an empty set throws instead of defaulting to "allow". The exception is swallowed by the sector's own error handling, so a sector registered with a mapper alone stays quiet and exports nothing. Register a condition — `ValueTask.FromResult(true)` is enough — until this is fixed.
+**A sector with no conditions allows everything.** `SectorBlock` asks the condition set for a verdict before anything else runs; an empty set means "allow" and processing continues straight to the mapper. A condition is still useful as a cheap filter, and `ValueTask.FromResult(true)` is the no-op version.
 
-**The in-memory pipe is process-local and its size is fixed in practice.** `AddInMemoryInput()` creates a bounded `Channel<TEvent>` of 1 000 000 items in `Wait` mode: producers block when it fills up, and everything queued is gone on restart. The `AddInMemoryInput(configure)` overload looks like it lets you change that, but `InMemoryExchangeOptions.ChannelOptions` is `init`-only, so the callback cannot assign it — treat the capacity as a constant until the options type is opened up.
+**The in-memory pipe is process-local and sized through options.** `AddInMemoryInput()` creates a bounded `Channel<TEvent>` of 1 000 000 items in `Wait` mode: producers block when it fills up, and everything queued is gone on restart. The `AddInMemoryInput(configure)` overload is the real knob — the callback receives `InMemoryExchangeOptions`, and its `ChannelOptions` (a `BoundedChannelOptions` or `UnboundedChannelOptions`) is what the exchange builds its channel from:
 
-**Testing a sector on a bare `ServiceCollection`?** Call `AddOptions()` and `AddLogging()` first. The exchange resolves `IOptions<InMemoryExchangeOptions>` and the sector resolves `ILogger<T>`; inside a generic host both are already registered, outside one they are not, and the container fails to activate the pipe.
+```csharp
+server.AddInMemoryInput(options => options.ChannelOptions = new BoundedChannelOptions(10_000)
+{
+    FullMode = BoundedChannelFullMode.DropOldest
+});
+```
+
+**Testing a sector on a bare `ServiceCollection`?** Call `AddLogging()` first — the sector resolves `ILogger<T>`, which a generic host registers for you and a bare collection does not. `AddInMemoryInput` registers the options infrastructure itself, so `AddOptions()` is no longer required just to activate the pipe.
 
 **Two `WithPipeline` blocks chain, they do not fork.** The notification returned by the first pipeline is what the second one receives, so a later step can overwrite an earlier one. Use one pipeline unless you actually want that ordering.
 
