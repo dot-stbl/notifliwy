@@ -70,6 +70,22 @@ The `AggregateAsync` extension method used `Func<TAccumulate, TSource, Task<TAcc
 
 ---
 
+## Bug 8: SectorBlock.ProcessingAsync throws on empty condition set
+
+**File:** `src/libraries/Notifliwy/Contexts/SectorBlock.cs`
+
+**Severity:** High
+
+**Status:** FIXED ✓
+
+**Description:**
+`ProcessingAsync` called `ConditionInstances.CheckoutInstanceAsync` without the `UseInstance` guard. A sector registered without conditions (`AddCondition` is optional) threw `EmptyInstanceBranchException` on every event; `NotificationSector` swallowed it, so the sector stayed quiet and exported nothing. Pipelines and exporters already had the same guard — only conditions were missing it.
+
+**Fix applied:**
+Guarded the condition check with `ConditionInstances.UseInstance` — an empty condition set now means "allow all", matching the documented optional-condition semantics.
+
+---
+
 ## Not Issues (Analyzed)
 
 | Item | Reason |
@@ -88,5 +104,6 @@ The `AggregateAsync` extension method used `Func<TAccumulate, TSource, Task<TAcc
 | #2 Fire-and-forget Task.Run | DOCUMENTED (by design) |
 | #3 Duplicate ConnectorsBuilder | NOT A BUG (by design) |
 | #4 AggregateAsync Task vs ValueTask | OPEN |
+| #8 Empty condition set throws | FIXED |
 
 **Next action:** Fix Bug #4 (AggregateAsync ValueTask) — high priority due to performance impact.
