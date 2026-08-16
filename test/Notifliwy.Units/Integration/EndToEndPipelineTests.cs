@@ -4,10 +4,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Notifliwy.Conditions.Interfaces;
 using Notifliwy.Dependency;
 using Notifliwy.Exporters.Interfaces;
 using Notifliwy.Mapper.Interfaces;
+using Notifliwy.Pipes.InMemory.Options;
 using Notifliwy.Steps.Interfaces;
 using Shouldly;
 using Xunit;
@@ -86,6 +88,8 @@ public class EndToEndPipelineTests(ITestOutputHelper output)
         // Arrange
         var exportedNotifications = new List<TestNotification>();
         var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddSingleton(Options.Create(new InMemoryExchangeOptions()));
         services.AddSingleton(exportedNotifications);
         services.AddSingleton<CollectionExporter>();
 
@@ -147,6 +151,8 @@ public class EndToEndPipelineTests(ITestOutputHelper output)
         // Arrange
         var exportedNotifications = new List<TestNotification>();
         var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddSingleton(Options.Create(new InMemoryExchangeOptions()));
         services.AddSingleton(exportedNotifications);
         services.AddSingleton<CollectionExporter>();
 
@@ -198,6 +204,8 @@ public class EndToEndPipelineTests(ITestOutputHelper output)
         // Arrange
         var exportedNotifications = new List<TestNotification>();
         var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddSingleton(Options.Create(new InMemoryExchangeOptions()));
         services.AddSingleton(exportedNotifications);
         services.AddSingleton<CollectionExporter>();
 
@@ -248,12 +256,13 @@ public class EndToEndPipelineTests(ITestOutputHelper output)
     public async Task EndToEnd_MultipleExportersReceiveNotification()
     {
         // Arrange
-        var exported1 = new List<TestNotification>();
-        var exported2 = new List<TestNotification>();
+        // both exporter instances ctor-bind the same singleton list,
+        //     so one event delivered by two exporters yields two entries
+        var exportedNotifications = new List<TestNotification>();
         var services = new ServiceCollection();
-        services.AddSingleton(exported1);
-        services.AddSingleton(exported2);
-        services.AddSingleton<CollectionExporter>();
+        services.AddLogging();
+        services.AddSingleton(Options.Create(new InMemoryExchangeOptions()));
+        services.AddSingleton(exportedNotifications);
         services.AddSingleton<CollectionExporter>();
 
         services.AddNotifliwyServer(serverBuilder =>
@@ -291,9 +300,61 @@ public class EndToEndPipelineTests(ITestOutputHelper output)
         }
 
         // Assert
-        exported1.Count.ShouldBe(1);
-        exported2.Count.ShouldBe(1);
-        exported1[0].Value.ShouldBe(20);
-        exported2[0].Value.ShouldBe(20);
+        exportedNotifications.Count.ShouldBe(2);
+        exportedNotifications[0].Value.ShouldBe(20);
+        exportedNotifications[1].Value.ShouldBe(20);
+    }
+
+    /// <summary>
+    /// Regression for GitHub #7: sector registered with mapper only (no conditions)
+    /// must not throw <c>EmptyInstanceBranchException</c> — empty condition set allows the event
+    /// </summary>
+    [Fact]
+    public async Task EndToEnd_MapperOnlySector_WithoutConditions_ShouldExportNotification()
+    {
+        // Arrange
+        var exportedNotifications = new List<TestNotification>();
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddSingleton(Options.Create(new InMemoryExchangeOptions()));
+        services.AddSingleton(exportedNotifications);
+        services.AddSingleton<CollectionExporter>();
+
+        services.AddNotifliwyServer(serverBuilder =>
+        {
+            serverBuilder.AddInMemoryInput();
+            serverBuilder.AddNotification<TestNotification, TestEvent>(sectorBuilder =>
+            {
+                sectorBuilder.AddMapper<SimpleMapper>();
+                sectorBuilder.AddExporter<CollectionExporter>();
+            });
+        });
+
+        var serviceProvider = services.BuildServiceProvider();
+        var exportPipe = serviceProvider.GetRequiredService<Notifliwy.Pipes.Interfaces.IExportPipe<TestEvent>>();
+        var hostedServices = serviceProvider.GetServices<IHostedService>();
+
+        // Start connector
+        foreach (var hostedService in hostedServices)
+        {
+            await hostedService.StartAsync(CancellationToken.None);
+        }
+
+        await Task.Delay(100);
+
+        // Act
+        await exportPipe.ExportAsync(new TestEvent { Value = 21 });
+
+        await Task.Delay(200);
+
+        // Stop connector
+        foreach (var hostedService in hostedServices)
+        {
+            await hostedService.StopAsync(CancellationToken.None);
+        }
+
+        // Assert
+        exportedNotifications.Count.ShouldBe(1);
+        exportedNotifications[0].Value.ShouldBe(42); // 21 * 2
     }
 }

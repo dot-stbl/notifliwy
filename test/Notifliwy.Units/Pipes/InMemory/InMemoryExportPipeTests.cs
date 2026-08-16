@@ -31,7 +31,7 @@ public class InMemoryExportPipeTests
         services.AddLogging();
         services.AddSingleton<IOptions<InMemoryExchangeOptions>>(Options.Create(new InMemoryExchangeOptions()));
         services.AddSingleton<IInMemoryEventExchange<TestEvent>, InMemoryEventExchange<TestEvent>>();
-        services.AddLogging();
+        services.AddTransient<InMemoryExportPipe<TestEvent>>();
         var serviceProvider = services.BuildServiceProvider();
 
         var exchange = serviceProvider.GetRequiredService<IInMemoryEventExchange<TestEvent>>();
@@ -56,7 +56,7 @@ public class InMemoryExportPipeTests
         services.AddLogging();
         services.AddSingleton<IOptions<InMemoryExchangeOptions>>(Options.Create(new InMemoryExchangeOptions()));
         services.AddSingleton<IInMemoryEventExchange<TestEvent>, InMemoryEventExchange<TestEvent>>();
-        services.AddLogging();
+        services.AddTransient<InMemoryExportPipe<TestEvent>>();
         var serviceProvider = services.BuildServiceProvider();
 
         var exchange = serviceProvider.GetRequiredService<IInMemoryEventExchange<TestEvent>>();
@@ -74,6 +74,8 @@ public class InMemoryExportPipeTests
         {
             await pipe.ExportAsync(evt);
         }
+
+        exchange.EventExchange.Writer.Complete();
 
         // Assert
         var receivedEvents = new List<TestEvent>();
@@ -96,7 +98,7 @@ public class InMemoryExportPipeTests
         services.AddLogging();
         services.AddSingleton<IOptions<InMemoryExchangeOptions>>(Options.Create(new InMemoryExchangeOptions()));
         services.AddSingleton<IInMemoryEventExchange<TestEvent>, InMemoryEventExchange<TestEvent>>();
-        services.AddLogging();
+        services.AddTransient<InMemoryExportPipe<TestEvent>>();
         var serviceProvider = services.BuildServiceProvider();
 
         var pipe = serviceProvider.GetRequiredService<InMemoryExportPipe<TestEvent>>();
@@ -119,7 +121,7 @@ public class InMemoryExportPipeTests
         services.AddLogging();
         services.AddSingleton<IOptions<InMemoryExchangeOptions>>(Options.Create(new InMemoryExchangeOptions()));
         services.AddSingleton<IInMemoryEventExchange<TestEvent>, InMemoryEventExchange<TestEvent>>();
-        services.AddLogging();
+        services.AddTransient<InMemoryExportPipe<TestEvent>>();
         var serviceProvider = services.BuildServiceProvider();
 
         var exchange = serviceProvider.GetRequiredService<IInMemoryEventExchange<TestEvent>>();
@@ -130,6 +132,8 @@ public class InMemoryExportPipeTests
         await pipe1.ExportAsync(new TestEvent { Value = 1 });
         await pipe2.ExportAsync(new TestEvent { Value = 2 });
         await pipe1.ExportAsync(new TestEvent { Value = 3 });
+
+        exchange.EventExchange.Writer.Complete();
 
         // Assert
         var receivedEvents = new List<TestEvent>();
@@ -156,7 +160,7 @@ public class InMemoryExportPipeTests
             }
         }));
         services.AddSingleton<IInMemoryEventExchange<TestEvent>, InMemoryEventExchange<TestEvent>>();
-        services.AddLogging();
+        services.AddTransient<InMemoryExportPipe<TestEvent>>();
         var serviceProvider = services.BuildServiceProvider();
 
         var exchange = serviceProvider.GetRequiredService<IInMemoryEventExchange<TestEvent>>();
@@ -165,13 +169,17 @@ public class InMemoryExportPipeTests
         // Act
         await pipe.ExportAsync(new TestEvent { Value = 1 });
         await pipe.ExportAsync(new TestEvent { Value = 2 });
-        var writeTask3 = pipe.ExportAsync(new TestEvent { Value = 3 });
+        var pendingWrite = pipe.ExportAsync(new TestEvent { Value = 3 }).AsTask();
 
         // Wait a bit to ensure write is still pending
         await Task.Delay(50);
 
         // Assert - writeTask3 should still be pending (not completed)
         // Channel with capacity 2, we wrote 2, third should be waiting
-        await writeTask3;
+        pendingWrite.Status.ShouldBe(TaskStatus.WaitingForActivation);
+
+        // Free a slot so the pending write completes and the test does not hang
+        await exchange.EventExchange.Reader.ReadAsync();
+        await pendingWrite;
     }
 }

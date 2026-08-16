@@ -57,7 +57,8 @@ public class SectorBlock<TNotification, TEvent>(
         TEvent inputEvent,
         CancellationToken cancellationToken = default)
     {
-        if (!await ConditionInstances.CheckoutInstanceAsync(
+        if (ConditionInstances.UseInstance
+            && !await ConditionInstances.CheckoutInstanceAsync(
                 async condition
                         => await conditionProcessor.AllowConditionAsync(inputEvent, condition, cancellationToken),
                 async conditions

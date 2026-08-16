@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Notifliwy.Builders;
 using Notifliwy.Builders.Internals.Interfaces;
 using Notifliwy.Pipes.InMemory.Interfaces;
@@ -78,6 +79,7 @@ public class NotificationServerBuilderTests
         // Arrange
         var services = new ServiceCollection();
         var builder = NotificationServerBuilder.CreateInstance(services);
+        services.AddSingleton(Options.Create(new InMemoryExchangeOptions()));
 
         // Act
         builder.AddInMemoryInput();
@@ -149,6 +151,7 @@ public class NotificationServerBuilderTests
         // Arrange
         var services = new ServiceCollection();
         var builder = NotificationServerBuilder.CreateInstance(services);
+        services.AddSingleton(Options.Create(new InMemoryExchangeOptions()));
 
         // Act
         builder.AddNotification<TestNotification, TestEvent>();
