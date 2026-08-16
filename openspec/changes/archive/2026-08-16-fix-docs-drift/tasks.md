@@ -10,4 +10,4 @@
 ## 2. Verify
 
 - [x] 2.1 Grep for known wrong strings (`ConfigureNotifliywypipe`, netstandard2.1 on core, contradictory OPEN for #4)
-- [ ] 2.2 Close GH #13
+- [x] 2.2 Close GH #13

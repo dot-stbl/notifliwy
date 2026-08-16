@@ -41,4 +41,4 @@
 - [x] 6.1 Update in-memory + kafka samples to config classes + graph
 - [x] 6.2 README graph section; close GH #9 and #2 with design rationale (GH issues themselves are closed by the orchestrator after merge — README/MIGRATION-3.2 now document the closing rationale)
 - [x] 6.3 Benchmarks: graph path vs 3.1-style baseline; Branch parallel scaling (CompiledVsScopedBenchmarks added alongside the existing sector benchmark; dry run verified)
-- [ ] 6.4 Archive this change; update main specs
+- [x] 6.4 Archive this change; update main specs

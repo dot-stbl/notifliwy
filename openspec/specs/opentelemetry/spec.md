@@ -3,9 +3,7 @@
 ## Purpose
 
 Defines how Notifliwy exposes ActivitySource/Meter signals and how the instrumentation package hooks them into an OpenTelemetry pipeline.
-
 ## Requirements
-
 ### Requirement: Activity source for connector and sector work
 
 The core library SHALL open activities for connector-level event handling and sector processing, tagged with event (and where applicable notification) type information.
@@ -33,7 +31,10 @@ The core library SHALL expose a meter/counter for accepted input events so hosts
 - **WHEN** a host calls the instrumentation extension and processes events
 - **THEN** OTel metrics export includes Notifliwy input counters (not an empty subscription)
 
-> Note: GH #6 tracks a bug where subscription used an instrument name that does not match the meter, so no metrics were collected.
+#### Scenario: Name parity
+
+- **WHEN** core meter name and instrumentation subscription name are compared
+- **THEN** they are identical strings (shared constant or tested equality)
 
 ### Requirement: Separate instrumentation package
 
@@ -43,3 +44,4 @@ OpenTelemetry wiring helpers MUST live in `Notifliwy.OpenTelemetry.Instrumentati
 
 - **WHEN** a consumer uses only `Notifliwy` without the instrumentation package
 - **THEN** the library still processes events; activities may simply go unobserved
+

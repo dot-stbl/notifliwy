@@ -12,4 +12,4 @@
 ## 3. Verify
 
 - [x] 3.1 `dotnet test test/Notifliwy.Units` green
-- [ ] 3.2 Close GH #11
+- [x] 3.2 Close GH #11

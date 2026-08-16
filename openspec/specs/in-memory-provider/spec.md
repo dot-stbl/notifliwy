@@ -3,9 +3,7 @@
 ## Purpose
 
 Defines the built-in in-process transport: channel-backed exchange, input pipe, export pipe, and configuration surface for capacity/options.
-
 ## Requirements
-
 ### Requirement: Built-in registration
 
 The core library SHALL provide `AddInMemoryInput` (or equivalent) on the server builder that registers an in-memory input pipe and exchange for the event types used by registered sectors.
@@ -35,14 +33,17 @@ Producers MUST publish events through `IExportPipe<TEvent>.ExportAsync` (or the 
 
 ### Requirement: Options integration for exchange configuration
 
-Registration that accepts a configure callback MUST actually bind options (capacity, full-mode, etc.) so the callback is not a no-op. Options registration MUST include whatever `IOptions` / `AddOptions` plumbing is required for activation.
+Registration that accepts a configure callback MUST bind options (capacity, full-mode, etc.) so the callback is not a no-op. Options registration MUST include `IOptions` / `AddOptions` plumbing required for activation.
 
 #### Scenario: Configure capacity
 
-- **WHEN** the consumer passes a configure action intended to set channel capacity
-- **THEN** the running exchange uses that capacity (or fails clearly if configuration is unsupported)
+- **WHEN** the consumer passes a configure action that sets channel capacity
+- **THEN** the running exchange uses that capacity
 
-> Note: GH #8 / #4 track broken or missing configuration for `AddInMemoryInput(configure)` and `InMemoryExchange`.
+#### Scenario: Configure is not a no-op
+
+- **WHEN** two hosts register with different capacity values
+- **THEN** their exchanges do not silently share a single hard-coded capacity ignoring both callbacks
 
 ### Requirement: Test hosts must register options services
 
@@ -52,3 +53,4 @@ Any host or test that builds a `ServiceCollection` for in-memory pipes MUST incl
 
 - **WHEN** unit tests register Notifliwy in-memory pieces on a bare `ServiceCollection` without options
 - **THEN** either the library registers options for them, or tests document the required `AddOptions` call (GH #11)
+

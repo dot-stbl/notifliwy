@@ -12,7 +12,7 @@
 ## 3. Verify
 
 - [x] 3.1 Build diagnostic + core projects
-- [ ] 3.2 Close GH #6
+- [x] 3.2 Close GH #6
 
 ### Findings (1.1–1.3)
 

@@ -3,9 +3,7 @@
 ## Purpose
 
 Defines how a registered event type is accepted, routed to sectors, and transformed into notifications through conditions, a required mapper, optional steps, and exporters.
-
 ## Requirements
-
 ### Requirement: Event ingress via input pipe
 
 For each registered event type `TEvent`, the host SHALL run a connector that consumes `IInputPipe<TEvent>.AcceptAsync()` as an `IAsyncEnumerable<TEvent>` until cancellation.
@@ -44,12 +42,17 @@ Each sector invocation SHALL open its own DI scope (or equivalent) so scoped dep
 
 ### Requirement: Sector processing order of stages
 
-Within a sector, stages SHALL execute in this order: conditions → mapper → pipelines/steps → exporters.
+Within a sector, processing SHALL follow the configured graph (`When` → `Map` → `Transform`/`Branch`/`Join`/`Custom` → `Export`). The fixed linear stage order and implicit pipeline chaining of 3.1 are removed.
 
 #### Scenario: Happy path with all stages
 
-- **WHEN** a sector has a passing condition, a mapper, one step, and one exporter
-- **THEN** the mapper runs only after the condition allows, the step receives the mapped notification, and the exporter receives the post-step notification
+- **WHEN** a sector graph has a passing When node, a Map, a Transform, and an Export
+- **THEN** the map runs only after the condition allows, the transform receives the mapped notification, and the exporter receives the post-transform notification
+
+#### Scenario: Graph-defined order
+
+- **WHEN** a sector graph maps, transforms, then fans out to two exporting branches
+- **THEN** execution follows the graph edges, not a fixed stage list
 
 ### Requirement: Conditions filter events
 
@@ -69,7 +72,10 @@ When no conditions are registered for a sector, the sector MUST treat the event 
 - **WHEN** a sector is registered with only `AddMapper` and no conditions
 - **THEN** each event is mapped and may be exported without throwing due to missing conditions
 
-> Note: As of the baseline commit series, GH #7 documents a defect where an empty condition set throws `EmptyInstanceBranchException`. Main specs state the intended contract; the fix is tracked as a change.
+#### Scenario: No EmptyInstanceBranchException for missing conditions
+
+- **WHEN** the condition instance set is unused (`UseInstance` is false)
+- **THEN** sector processing skips condition checkout and does not throw `EmptyInstanceBranchException`
 
 ### Requirement: Mapper is required
 
@@ -80,25 +86,14 @@ A sector MUST have a registered `INotificationMapper<TNotification, TEvent>`. Co
 - **WHEN** a sector is registered without a mapper
 - **THEN** the host fails registration/startup with a sector-minimal-required style error
 
-### Requirement: Pipelines transform the notification
-
-Steps registered on a sector (via pipelines) SHALL transform the notification after mapping. When multiple pipeline blocks are registered, the current runtime chains them: each pipeline receives the output of the previous pipeline.
-
-#### Scenario: Two pipelines chain
-
-- **WHEN** two `WithPipeline` blocks are registered and the first mutates the notification
-- **THEN** the second pipeline observes the first pipeline's result (not a fresh copy of the mapped notification)
-
-> Note: GH #9 tracks whether independence (fan-out + merge) should replace chaining. Until a change archives, chaining is the documented runtime behaviour.
-
 ### Requirement: Exporters receive the final notification
 
-Every registered exporter for the sector SHALL be invoked with the final notification after conditions, mapping, and steps. Failure of one exporter MUST NOT prevent other exporters on the same sector from being attempted unless a documented decorator policy says otherwise.
+Every `Export` node reached in the graph SHALL receive the notification produced by its upstream path, and branch policy governs failure handling (see `sector-graph`).
 
 #### Scenario: Two exporters
 
-- **WHEN** two exporters are registered and the first completes successfully
-- **THEN** the second is still invoked with the same final notification value
+- **WHEN** two branches each end in an Export node
+- **THEN** both exporters are invoked with their branch's notification, in parallel
 
 ### Requirement: Sector failures are contained and observable
 
@@ -108,3 +103,4 @@ Exceptions during a sector's processing MUST be caught at the sector/connector b
 
 - **WHEN** a mapper throws for one event
 - **THEN** the failure is logged and other sectors for that event still run (or complete) according to parallel scheduling; the hosted connector continues accepting further events after the failure is handled
+

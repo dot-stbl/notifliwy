@@ -3,12 +3,10 @@
 ## Purpose
 
 Defines what must stay true about project documentation relative to the code and NuGet packages.
-
 ## Requirements
-
 ### Requirement: Target frameworks match the csproj
 
-Any doc that lists TFMs for the core library MUST match `Notifliwy.csproj` (`net6.0;net7.0;net8.0` unless the project changes).
+Any doc that lists TFMs for the core library MUST match `Notifliwy.csproj` (`net6.0;net7.0;net8.0` unless the project changes). netstandard2.1 MUST NOT be claimed for core if only the protobuf extension targets it.
 
 #### Scenario: CLAUDE/README TFM list
 
@@ -50,3 +48,4 @@ Docs that describe fire-and-forget `Task.Run` per sector MUST be updated if the 
 
 - **WHEN** a reader compares the connector prose to the implementation
 - **THEN** the concurrency and error-handling story matches the code
+

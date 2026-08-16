@@ -3,9 +3,7 @@
 ## Purpose
 
 Defines the fluent registration surface (`AddNotifliwyServer`, sector builder methods) and how pipeline components are registered in the Microsoft.Extensions.DependencyInjection container.
-
 ## Requirements
-
 ### Requirement: Server registration entry point
 
 Consumers MUST be able to register Notifliwy via an extension on `IServiceCollection` named `AddNotifliwyServer` that accepts a configuration callback over a server builder.
@@ -17,21 +15,12 @@ Consumers MUST be able to register Notifliwy via an extension on `IServiceCollec
 
 ### Requirement: Sector registration pairs notification and event
 
-The server builder SHALL provide `AddNotification<TNotification, TEvent>` that accepts a sector configuration callback for conditions, mapper, pipelines, and exporters.
+The server builder SHALL provide `AddSector<TConfig>()` for `INotificationSectorConfig<TNotification, TEvent>` classes and `AddSector<TNotification, TEvent>(g => …)` for inline graph lambdas. The 3.1 `AddNotification` fluent block is removed.
 
 #### Scenario: Register one sector
 
-- **WHEN** `AddNotification<PaymentAlert, PaymentFailed>(sector => sector.AddMapper<…>())` is called
-- **THEN** a sector mapping `PaymentFailed` → `PaymentAlert` is registered for the connector of `PaymentFailed`
-
-### Requirement: Fluent stage methods on the sector builder
-
-The sector builder SHALL expose methods to add a condition, a mapper, pipeline steps, and exporters for that sector only (not on the server builder).
-
-#### Scenario: Full sector fluent chain
-
-- **WHEN** the consumer calls `AddCondition`, `AddMapper`, `WithPipeline`, and `AddExporter` on the sector builder
-- **THEN** those components are registered for that sector's notification/event pair
+- **WHEN** `AddSector<PaymentSector>()` is called
+- **THEN** a sector mapping its event to its notification is registered for that connector
 
 ### Requirement: Pipeline components are DI services
 
@@ -59,3 +48,4 @@ Input pipes (in-memory or external providers) SHALL be registered via dedicated 
 
 - **WHEN** sectors are registered but no input pipe is registered for `TEvent`
 - **THEN** the connector for `TEvent` cannot usefully accept events until an input is registered (startup or runtime error is acceptable; silent hang is not preferred)
+

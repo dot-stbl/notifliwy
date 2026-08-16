@@ -14,4 +14,4 @@
 - [x] 3.1 Unit test: configure capacity (or equivalent) is observed
 - [x] 3.2 Update README / NOTIFLIWY snippet if public configure is newly usable
 - [x] 3.3 `dotnet test test/Notifliwy.Units`
-- [ ] 3.4 Close #8 and #4 when merged
+- [x] 3.4 Close #8 and #4 when merged
