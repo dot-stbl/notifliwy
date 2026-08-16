@@ -9,7 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 dotnet build notifliwy.sln
 ```
 
-The solution targets multiple .NET frameworks: 6.0, 7.0, and 8.0 (netstandard2.1). Build using `dotnet build` which handles multi-targeting automatically.
+The solution targets multiple .NET frameworks: 6.0, 7.0, and 8.0. Build using `dotnet build` which handles multi-targeting automatically.
 
 ### Running Tests
 ```bash
@@ -75,7 +75,7 @@ event -> inputPipe.AcceptAsync() -> connector -> sector.ProcessAsync()
 **2. Notification Sector**
 - Maps a specific `TEvent` type to a `TNotification` type
 - Contains one or more pipelines for processing the notification
-- Each pipeline runs independently and sequentially (multiple pipelines run in parallel)
+- Pipelines chain: the notification returned by one pipeline is passed as input to the next (whether they should instead run independently is tracked in #9)
 
 **3. Pipeline Stages (in order of execution)**
 - `IInputPipe<TEvent>` - Provides `IAsyncEnumerable<TEvent>` via `AcceptAsync()`
@@ -86,14 +86,14 @@ event -> inputPipe.AcceptAsync() -> connector -> sector.ProcessAsync()
 
 **4. NotificationConnector**
 - Background service that bridges `IInputPipe<TEvent>` to all registered sectors
-- Uses `Parallel.ForEachAsync` for concurrent processing across sectors
-- Uses `Task.Run` for each sector handler (allows multiple sectors to process same event in parallel)
+- Awaits `Parallel.ForEachAsync` over sectors (`MaxDegreeOfParallelism = ProcessorCount`) so multiple sectors process the same event concurrently
+- Sector errors are logged and rethrown; the connector waits for all sectors before pulling the next event
 - Integrates with `DiagnosticActivity` and `DiagnosticMeter` for observability
 
 ### Processing Model
 
 - **Sectors** process events **in parallel** via `Parallel.ForEachAsync`
-- **Pipelines within a sector** run **sequentially**
+- **Pipelines within a sector** run **sequentially and chain** — each pipeline receives the previous pipeline's output (#9)
 - Each sector creates its own DI scope per event
 
 ### Provider Pattern
@@ -108,7 +108,7 @@ Providers extend Notifliwy by implementing `IInputPipe<TEvent>` for specific mes
 **Kafka Provider (MassTransit)**
 - `KafkaConsumerPipe<TEvent>` implements MassTransit consumer
 - Uses `InMemoryExportPipe` internally for buffering
-- Added via `registrationConfigurator.AddNotifliwyPipe<TEvent>()` and `endpoint.ConfigureNotifliywypipe()`
+- Added via `registrationConfigurator.AddNotifliwyPipe<TEvent>()` and `endpoint.ConfigureNotifliwyPipe(context)`
 
 ### Dependency Injection Patterns
 
@@ -128,8 +128,7 @@ Providers extend Notifliwy by implementing `IInputPipe<TEvent>` for specific mes
 
 See [docs/BUGS.md](docs/BUGS.md) for current bugs, investigations, and fix status.
 
-**Current open issues:**
-- Bug #4: `EnumerableExtensions.AggregateAsync` uses `Task` instead of `ValueTask` — performance impact
+**No open issues** — all recorded findings are fixed or documented as intentional design.
 
 ## Coding Rules
 
@@ -176,9 +175,9 @@ INotificationExporter<TN>: ThrowAsync(TN notif, CT ct) -> ValueTask
 
 - **Fluent API**: All configuration uses builder pattern with method chaining
 - **Async Throughout**: All interfaces use `ValueTask` or `Task` for async operations
-- **Multi-Targeting**: Core library supports .NET 6.0, 7.0, 8.0 and netstandard2.1
+- **Multi-Targeting**: Core library targets .NET 6.0, 7.0 and 8.0 (netstandard2.1 is the `Synaptix.MassTransit.Kafka.Protobuf` add-on only)
 - **DI-based**: All pipeline components must be registered in DI
-- **Parallel Processing**: Sectors process events in parallel; pipelines within a sector run sequentially
+- **Parallel Processing**: Sectors process events in parallel; pipelines within a sector run sequentially and chain into each other (#9)
 - **Cancellation Support**: All async methods accept `CancellationToken`
 - **Primary Constructors**: Use C# 12 primary constructor syntax
 

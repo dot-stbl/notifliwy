@@ -50,7 +50,7 @@ Each stage has a specific responsibility:
 ### Processing Model
 
 - **Sectors process events in parallel** — multiple sectors can handle the same event concurrently
-- **Pipelines within a sector run sequentially** — steps execute in order
+- **Pipelines within a sector run sequentially and chain** — the notification returned by one pipeline is the input to the next (see #9 for the discussion on intended behavior)
 - **Each event gets its own DI scope** — ensures fresh instances per event
 
 ---
@@ -83,7 +83,7 @@ serverBuilder.AddNotification<MyNotification, MyEvent>(sectorBuilder =>
         pipelineBuilder.AddStep<Step1>();
         pipelineBuilder.AddStep<Step2>();
     });
-    serverBuilder.AddExporter<MyExporter>();          // Final output
+    sectorBuilder.AddExporter<MyExporter>();       // Final output
 });
 ```
 
@@ -224,11 +224,11 @@ See [docs/BUGS.md](docs/BUGS.md) for detailed bug reports and fix status.
 | Bug | Severity | Status |
 |----|----------|--------|
 | #1 MultiplyServiceInstance.CheckoutInstanceAsync calls multiplyAction after singleAction | High | FIXED |
-| #2 Fire-and-forget Task.Run in NotificationConnector | Medium | DOCUMENTED (by design) |
+| #2 Fire-and-forget Task.Run in NotificationConnector | Medium | RESOLVED (connector rewritten to awaited `Parallel.ForEachAsync`) |
 | #3 Duplicate ConnectorsBuilder for same TEvent | Low | NOT A BUG (by design) |
-| #4 EnumerableExtensions.AggregateAsync uses Task instead of ValueTask | Medium | OPEN |
+| #4 EnumerableExtensions.AggregateAsync uses Task instead of ValueTask | Medium | FIXED |
 
-**Priority fix:** Bug #4 — `AggregateAsync` should use `ValueTask` for consistency and performance.
+**No open items** — see [docs/BUGS.md](docs/BUGS.md) for details.
 
 ---
 

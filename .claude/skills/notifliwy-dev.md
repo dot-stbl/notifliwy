@@ -266,11 +266,11 @@ if (IsSingle && Single != null)
 await multiplyAction(Multiply!);
 ```
 
-### Bug: Fire-and-forget Task.Run
+### Bug: Fire-and-forget Task.Run (historical)
 
-`NotificationConnector` uses fire-and-forget `Task.Run` without awaiting. Exceptions are silently swallowed.
+The connector previously used fire-and-forget `Task.Run`, silently swallowing exceptions. Resolved: it now awaits `Parallel.ForEachAsync` over all sectors; sector errors are logged and rethrown.
 
-**Location:** `src/libraries/Notifliwy/Connectors/NotificationConnector.cs`, line 48
+**Location:** `src/libraries/Notifliwy/Connectors/NotificationConnector.cs`
 
 ## Key Files Reference
 

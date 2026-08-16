@@ -435,9 +435,9 @@ endpoint.ConfigureNotifliwyPipe<MyEvent>(pipe =>
 ## Processing Model
 
 - **Sectors process events in parallel** — `Parallel.ForEachAsync` across sectors
-- **Pipelines within sector run sequentially** — steps execute in order
+- **Pipelines within sector run sequentially and chain** — each pipeline receives the previous pipeline's output (#9)
 - **Each event gets its own DI scope** — fresh instances per event
-- **Fire-and-forget** — sectors run via `Task.Run`, errors logged in SectorBlock
+- **Errors are logged and rethrown** — the connector awaits all sectors before pulling the next event
 
 ---
 
