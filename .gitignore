@@ -265,3 +265,7 @@ FodyWeavers.xsd
 *.msm
 *.msp
 coverage*[.json, .xml, .info]
+
+# Agent worktrees
+.agents/worktree/
+
