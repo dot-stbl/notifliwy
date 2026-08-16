@@ -1,5 +1,7 @@
+using System.Text.Json;
 using Notifliwy.Conditions.Interfaces;
 using Notifliwy.Dependency;
+using Notifliwy.Exporters.Interfaces;
 using Notifliwy.Mapper.Interfaces;
 using Notifliwy.Pipes.Interfaces;
 
@@ -8,12 +10,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddNotifliwyServer(serverBuilder =>
 {
     serverBuilder.AddInMemoryInput();
-    serverBuilder.AddNotification<TestNotification, TestEvent>(sectorBuilder =>
-    {
-        sectorBuilder
-                .AddMapper<TestMapper>()
-                .AddCondition<TestCondition>();
-    });
+    serverBuilder.AddSector<TestNotification, TestEvent>(graph => graph
+            .When<TestCondition>()
+            .Map<TestMapper>()
+            .Export<ConsoleNotificationExporter>());
 });
 
 builder.Services.AddHostedService<PutterService>();
@@ -49,6 +49,15 @@ public class TestCondition : INotificationCondition<TestNotification, TestEvent>
         CancellationToken cancellationToken = default)
     {
         return ValueTask.FromResult(inputEvent.InputValue % 5 == 0);
+    }
+}
+
+public class ConsoleNotificationExporter : INotificationExporter<TestNotification>
+{
+    public ValueTask ThrowAsync(TestNotification notification, CancellationToken cancellationToken = default)
+    {
+        Console.WriteLine(JsonSerializer.Serialize(notification));
+        return ValueTask.CompletedTask;
     }
 }
 

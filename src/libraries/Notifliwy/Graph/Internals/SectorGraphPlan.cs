@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Notifliwy.Config;
 
 namespace Notifliwy.Graph.Internals;
 
@@ -151,10 +152,17 @@ internal sealed class GraphJoinDefinition<TNotification, TEvent>(Type joinType)
 ///     (guaranteed by validation), <see langword="null"/> for branch sub-plans
 /// </param>
 /// <param name="nodes">Ordered main-path nodes executed after the map; for branch sub-plans this is the whole branch body</param>
+/// <param name="defaultBranchPolicy">
+///     Sector-level default policy for fan-outs without their own override;
+///     <see langword="null"/> falls back to <see cref="BranchPolicy.FailFast"/> at execution
+/// </param>
+/// <param name="execution">Execution mode requested for this sector (see <see cref="SectorExecution"/>)</param>
 internal sealed class SectorGraphPlan<TNotification, TEvent>(
     Type[] conditionTypes,
     GraphMapRegistration<TNotification, TEvent>? map,
-    GraphNodeDefinition<TNotification, TEvent>[] nodes)
+    GraphNodeDefinition<TNotification, TEvent>[] nodes,
+    BranchPolicy? defaultBranchPolicy = null,
+    SectorExecution execution = SectorExecution.Auto)
 {
     /// <summary>
     /// Condition types evaluated against the raw event, in registration order.
@@ -173,4 +181,17 @@ internal sealed class SectorGraphPlan<TNotification, TEvent>(
     /// is the whole branch body.
     /// </summary>
     public GraphNodeDefinition<TNotification, TEvent>[] Nodes { get; } = nodes;
+
+    /// <summary>
+    /// Sector-level default policy applied to fan-outs that do not carry their
+    /// own <see cref="GraphBranchDefinition{TNotification,TEvent}.PolicyOverride"/>.
+    /// <see langword="null"/> falls back to <see cref="BranchPolicy.FailFast"/>.
+    /// </summary>
+    public BranchPolicy? DefaultBranchPolicy { get; } = defaultBranchPolicy;
+
+    /// <summary>
+    /// Execution mode requested for this sector. Until the compiled path lands,
+    /// every mode executes with per-event scoped semantics.
+    /// </summary>
+    public SectorExecution Execution { get; } = execution;
 }

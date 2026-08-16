@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Notifliwy.Conditions.Interfaces;
+using Notifliwy.Config;
 using Notifliwy.Custom.Interfaces;
 using Notifliwy.Exceptions;
 using Notifliwy.Exporters.Interfaces;
@@ -18,7 +19,7 @@ namespace Notifliwy.Graph;
 
 /// <summary>
 /// Concrete <see cref="ISectorGraphBuilder{TNotification,TEvent}"/> accumulating graph
-/// registrations in call order. <see cref="BuildPlan"/> validates the structure and
+/// registrations in call order. <see cref="BuildPlan()"/> validates the structure and
 /// freezes it into an immutable executable plan.
 /// </summary>
 /// <typeparam name="TNotification">The notification type produced by the <c>Map</c> node</typeparam>
@@ -152,6 +153,24 @@ public class SectorGraphBuilder<TNotification, TEvent> : ISectorGraphBuilder<TNo
     /// </summary>
     internal SectorGraphPlan<TNotification, TEvent> BuildPlan()
     {
+        return BuildPlan(sectorBranchPolicy: null, SectorExecution.Auto);
+    }
+
+    /// <summary>
+    /// Validate the recorded structure and freeze it into an immutable
+    /// <see cref="SectorGraphPlan{TNotification,TEvent}"/> carrying sector-level
+    /// options. Throws <see cref="SectorGraphValidationException"/> naming this
+    /// sector on any violation.
+    /// </summary>
+    /// <param name="sectorBranchPolicy">
+    ///     sector-level default policy for fan-outs without their own override;
+    ///     <see langword="null"/> falls back to <see cref="BranchPolicy.FailFast"/>
+    /// </param>
+    /// <param name="execution">execution mode requested for this sector</param>
+    internal SectorGraphPlan<TNotification, TEvent> BuildPlan(
+        BranchPolicy? sectorBranchPolicy,
+        SectorExecution execution)
+    {
         var violations = new List<string>();
         SectorGraphValidator.CollectViolations<TNotification, TEvent>(Registrations, BranchScope, violations);
 
@@ -160,13 +179,14 @@ public class SectorGraphBuilder<TNotification, TEvent> : ISectorGraphBuilder<TNo
             throw new SectorGraphValidationException(SectorName(), violations);
         }
 
-        return Freeze();
+        return Freeze(sectorBranchPolicy, execution);
     }
 
     /// <summary>
     /// Register the graph into <paramref name="serviceCollection"/>: node service types
-    /// as scoped services, the frozen plan as a singleton and the executor as a scoped
-    /// service. Validation runs here, so a broken graph fails at startup registration.
+    /// as scoped services (skipping types the host already registered, so custom
+    /// lifetimes and instances win), the frozen plan and the executor as singletons.
+    /// Validation runs here, so a broken graph fails at startup registration.
     /// </summary>
     internal void RegisterGraph(IServiceCollection serviceCollection)
     {
@@ -174,21 +194,31 @@ public class SectorGraphBuilder<TNotification, TEvent> : ISectorGraphBuilder<TNo
 
         foreach (var conditionType in plan.ConditionTypes)
         {
-            serviceCollection.AddScoped(conditionType);
+            RegisterIfMissing(serviceCollection, conditionType);
         }
 
         if (plan.Map?.MapperType is { } mapperType)
         {
-            serviceCollection.AddScoped(mapperType);
+            RegisterIfMissing(serviceCollection, mapperType);
         }
 
         foreach (var serviceType in CollectNodeServiceTypes(plan))
         {
-            serviceCollection.AddScoped(serviceType);
+            RegisterIfMissing(serviceCollection, serviceType);
         }
 
         serviceCollection.AddSingleton(plan);
-        serviceCollection.AddScoped<SectorGraphExecutor<TNotification, TEvent>>();
+        serviceCollection.AddSingleton<SectorGraphExecutor<TNotification, TEvent>>();
+    }
+
+    private static void RegisterIfMissing(
+        IServiceCollection serviceCollection,
+        Type serviceType)
+    {
+        if (serviceCollection.All(descriptor => descriptor.ServiceType != serviceType))
+        {
+            serviceCollection.AddScoped(serviceType);
+        }
     }
 
     private static IEnumerable<Type> CollectNodeServiceTypes(SectorGraphPlan<TNotification, TEvent> plan)
@@ -231,7 +261,9 @@ public class SectorGraphBuilder<TNotification, TEvent> : ISectorGraphBuilder<TNo
         }
     }
 
-    private SectorGraphPlan<TNotification, TEvent> Freeze()
+    private SectorGraphPlan<TNotification, TEvent> Freeze(
+        BranchPolicy? sectorBranchPolicy,
+        SectorExecution execution)
     {
         var conditionTypes = Registrations
                 .OfType<GraphWhenRegistration>()
@@ -243,11 +275,11 @@ public class SectorGraphBuilder<TNotification, TEvent> : ISectorGraphBuilder<TNo
             .FirstOrDefault();
 
         var nodes = Registrations
-            .OfType<GraphNodeDefinition<TNotification, TEvent>>()
-            .Select(FreezeNode)
-            .ToArray();
+                .OfType<GraphNodeDefinition<TNotification, TEvent>>()
+                .Select(FreezeNode)
+                .ToArray();
 
-        return new SectorGraphPlan<TNotification, TEvent>(conditionTypes, map, nodes);
+        return new SectorGraphPlan<TNotification, TEvent>(conditionTypes, map, nodes, sectorBranchPolicy, execution);
     }
 
     private GraphNodeDefinition<TNotification, TEvent> FreezeNode(

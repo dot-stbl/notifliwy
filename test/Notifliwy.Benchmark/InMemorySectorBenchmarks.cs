@@ -103,13 +103,11 @@ public class InMemorySectorBenchmarks
 
         services.AddNotifliwyServer(serverBuilder =>
         {
-            serverBuilder.AddNotification<BenchmarkNotification, BenchmarkEvent>(sectorBuilder =>
-            {
-                sectorBuilder.AddCondition<AllowAllCondition>();
-                sectorBuilder.AddMapper<BenchmarkMapper>();
-                sectorBuilder.WithPipeline(pipelineBuilder => pipelineBuilder.AddStep<BenchmarkTransform>());
-                sectorBuilder.AddExporter<NoOpExporter>();
-            });
+            serverBuilder.AddSector<BenchmarkNotification, BenchmarkEvent>(graph => graph
+                .When<AllowAllCondition>()
+                .Map<BenchmarkMapper>()
+                .Transform<BenchmarkTransform>()
+                .Export<NoOpExporter>());
         });
 
         serviceProvider = services.BuildServiceProvider();

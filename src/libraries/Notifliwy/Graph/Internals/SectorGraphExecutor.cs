@@ -52,8 +52,9 @@ internal sealed class SectorGraphExecutor<TNotification, TEvent>(
     {
         foreach (var conditionType in plan.ConditionTypes)
         {
-            var condition = (INotificationCondition<TNotification, TEvent>)serviceProvider
-                    .GetRequiredService(conditionType);
+            var condition = (INotificationCondition<TNotification, TEvent>)ResolveNode(
+                serviceProvider,
+                conditionType);
 
             if (!await condition.AllowItAsync(inputEvent, cancellationToken))
             {
@@ -72,8 +73,9 @@ internal sealed class SectorGraphExecutor<TNotification, TEvent>(
 
         if (map.MapperType is { } mapperType)
         {
-            var mapper = (INotificationMapper<TNotification, TEvent>)serviceProvider
-                    .GetRequiredService(mapperType);
+            var mapper = (INotificationMapper<TNotification, TEvent>)ResolveNode(
+                serviceProvider,
+                mapperType);
 
             current = await mapper.ConvertAsync(inputEvent, cancellationToken);
         }
@@ -87,6 +89,17 @@ internal sealed class SectorGraphExecutor<TNotification, TEvent>(
         }
 
         await RunNodesAsync(serviceProvider, plan.Nodes, current, cancellationToken);
+    }
+
+    private static object ResolveNode(
+        IServiceProvider serviceProvider,
+        Type nodeType)
+    {
+        // graphs registered inline have their node types pre-registered as scoped
+        // services; graphs materialized from config classes resolve lazily, so fall
+        // back to constructing the node from the per-event scope (same scoped semantics)
+        return serviceProvider.GetService(nodeType)
+                ?? ActivatorUtilities.CreateInstance(serviceProvider, nodeType);
     }
 
     private async ValueTask<TNotification> RunNodesAsync(
@@ -103,8 +116,9 @@ internal sealed class SectorGraphExecutor<TNotification, TEvent>(
             {
                 case GraphTransformDefinition<TNotification, TEvent> transformDefinition:
                 {
-                    var transform = (INotificationTransform<TNotification>)serviceProvider
-                            .GetRequiredService(transformDefinition.TransformType);
+                    var transform = (INotificationTransform<TNotification>)ResolveNode(
+                        serviceProvider,
+                        transformDefinition.TransformType);
 
                     current = await transform.TransformAsync(current, cancellationToken);
                     break;
@@ -114,8 +128,9 @@ internal sealed class SectorGraphExecutor<TNotification, TEvent>(
                 {
                     if (customDefinition.CustomType is { } customType)
                     {
-                        var custom = (INotificationCustom<TNotification>)serviceProvider
-                                .GetRequiredService(customType);
+                        var custom = (INotificationCustom<TNotification>)ResolveNode(
+                            serviceProvider,
+                            customType);
 
                         current = await custom.InvokeAsync(current, cancellationToken);
                     }
@@ -129,8 +144,9 @@ internal sealed class SectorGraphExecutor<TNotification, TEvent>(
 
                 case GraphExportDefinition<TNotification, TEvent> exportDefinition:
                 {
-                    var exporter = (INotificationExporter<TNotification>)serviceProvider
-                            .GetRequiredService(exportDefinition.ExporterType);
+                    var exporter = (INotificationExporter<TNotification>)ResolveNode(
+                        serviceProvider,
+                        exportDefinition.ExporterType);
 
                     await exporter.ThrowAsync(current, cancellationToken);
                     break;
@@ -162,8 +178,9 @@ internal sealed class SectorGraphExecutor<TNotification, TEvent>(
                     }
                     else
                     {
-                        var join = (INotificationJoin<TNotification>)serviceProvider
-                                .GetRequiredService(joinDefinition.JoinType);
+                        var join = (INotificationJoin<TNotification>)ResolveNode(
+                            serviceProvider,
+                            joinDefinition.JoinType);
 
                         current = await join.JoinAsync(branchOutputs, cancellationToken);
                     }
@@ -183,7 +200,9 @@ internal sealed class SectorGraphExecutor<TNotification, TEvent>(
         TNotification input,
         CancellationToken cancellationToken)
     {
-        var policy = branchDefinition.PolicyOverride ?? BranchPolicy.FailFast;
+        var policy = branchDefinition.PolicyOverride
+                ?? plan.DefaultBranchPolicy
+                ?? BranchPolicy.FailFast;
 
         if (policy == BranchPolicy.FailFast)
         {
