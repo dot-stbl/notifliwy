@@ -35,9 +35,9 @@ Tests that activate options-bound services MUST register options (`AddOptions`) 
 
 ### Requirement: Package version consistency
 
-Project version properties for published packages MUST match the version intended for NuGet (or the discrepancy is documented). csproj saying 2.1.0 while NuGet has 2.2.0 for the same package id is a defect (GH #12).
+Project version properties for published packages MUST match the version intended for NuGet (or the discrepancy is documented).
 
-#### Scenario: Protobuf package version
+#### Scenario: Core package version
 
-- **WHEN** a reader compares `Synaptix.MassTransit.Kafka.Protobuf` csproj version to nuget.org
+- **WHEN** a reader compares `Notifliwy` / Kafka provider / OTel csproj `Version` to nuget.org
 - **THEN** the versions agree or the repo documents the next publish plan

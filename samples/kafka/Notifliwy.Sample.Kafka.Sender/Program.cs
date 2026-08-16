@@ -1,7 +1,6 @@
 using MassTransit;
 using Notifliwy.Sample.Kafka;
 using Notifliwy.Sample.Kafka.Sender;
-using Synaptix.MassTransit.Kafka.Protobuf;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,8 +25,6 @@ builder.Services.AddMassTransit(configurator =>
 
         registrationConfigurator.UsingKafka((_, factoryConfigurator) =>
         {
-            factoryConfigurator.SetSerializationFactory(new ProtobufKafkaSerializerFactory());
-
             factoryConfigurator.Host("localhost:9092");
 
             factoryConfigurator.TopicEndpoint<CatMeowEvent>(

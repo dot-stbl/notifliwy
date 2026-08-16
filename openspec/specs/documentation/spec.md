@@ -8,7 +8,7 @@ Defines what must stay true about project documentation relative to the code and
 
 ### Requirement: Target frameworks match the csproj
 
-Any doc that lists TFMs for the core library MUST match `Notifliwy.csproj` (`net6.0;net7.0;net8.0` unless the project changes). netstandard2.1 MUST NOT be claimed for core if only the protobuf extension targets it.
+Any doc that lists TFMs for the core library MUST match `Notifliwy.csproj` (`net6.0;net7.0;net8.0` unless the project changes).
 
 #### Scenario: CLAUDE/README TFM list
 

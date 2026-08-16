@@ -9,7 +9,7 @@ context: |
     - Notifliwy (core, multi-target net6.0;net7.0;net8.0)
     - Notifliwy.Provider.MassTransit.Kafka
     - Notifliwy.OpenTelemetry.Instrumentation
-    - Synaptix.MassTransit.Kafka.Protobuf (netstandard2.1)
+    - (removed) Synaptix.MassTransit.Kafka.Protobuf — dropped from the repo; use MassTransit rider serializers directly
 
   Pipeline (as designed):
     event → IInputPipe.AcceptAsync → NotificationConnector (BackgroundService)

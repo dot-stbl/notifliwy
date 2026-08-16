@@ -7,12 +7,11 @@
 </p>
 
 <details>
-<summary><strong>One core library and three add-ons, all published on NuGet.</strong></summary>
+<summary><strong>One core library and two add-ons, all published on NuGet.</strong></summary>
 
 [![Notifliwy](https://img.shields.io/nuget/dt/Notifliwy?style=flat-square&label=Notifliwy&color=101010)](https://www.nuget.org/packages/Notifliwy)
 [![Kafka provider](https://img.shields.io/nuget/dt/Notifliwy.Provider.MassTransit.Kafka?style=flat-square&label=Provider.MassTransit.Kafka&color=101010)](https://www.nuget.org/packages/Notifliwy.Provider.MassTransit.Kafka)
 [![OpenTelemetry](https://img.shields.io/nuget/dt/Notifliwy.OpenTelemetry.Instrumentation?style=flat-square&label=OpenTelemetry.Instrumentation&color=101010)](https://www.nuget.org/packages/Notifliwy.OpenTelemetry.Instrumentation)
-[![Protobuf add-on](https://img.shields.io/nuget/dt/Synaptix.MassTransit.Kafka.Protobuf?style=flat-square&label=Synaptix.MassTransit.Kafka.Protobuf&color=101010)](https://www.nuget.org/packages/Synaptix.MassTransit.Kafka.Protobuf)
 
 </details>
 <p></p>
@@ -143,7 +142,6 @@ A runnable version of this, with a background producer, is in
 | [**Notifliwy**](https://www.nuget.org/packages/Notifliwy) [![Notifliwy version](https://img.shields.io/nuget/v/Notifliwy?style=flat-square&label=&color=101010)](https://www.nuget.org/packages/Notifliwy) | builders, connector, sectors, the in-memory pipe, tracing and metrics | net6.0 · net7.0 · net8.0 |
 | [**Notifliwy.Provider.MassTransit.Kafka**](https://www.nuget.org/packages/Notifliwy.Provider.MassTransit.Kafka) [![Kafka provider version](https://img.shields.io/nuget/v/Notifliwy.Provider.MassTransit.Kafka?style=flat-square&label=&color=101010)](https://www.nuget.org/packages/Notifliwy.Provider.MassTransit.Kafka) | turns a MassTransit Kafka rider into an input pipe | net6.0 · net7.0 · net8.0 |
 | [**Notifliwy.OpenTelemetry.Instrumentation**](https://www.nuget.org/packages/Notifliwy.OpenTelemetry.Instrumentation) [![OpenTelemetry package version](https://img.shields.io/nuget/v/Notifliwy.OpenTelemetry.Instrumentation?style=flat-square&label=&color=101010)](https://www.nuget.org/packages/Notifliwy.OpenTelemetry.Instrumentation) | one call each for the tracer and the meter provider | net6.0 · net7.0 · net8.0 |
-| [**Synaptix.MassTransit.Kafka.Protobuf**](https://www.nuget.org/packages/Synaptix.MassTransit.Kafka.Protobuf) [![Protobuf add-on version](https://img.shields.io/nuget/v/Synaptix.MassTransit.Kafka.Protobuf?style=flat-square&label=&color=101010)](https://www.nuget.org/packages/Synaptix.MassTransit.Kafka.Protobuf) | protobuf-net serialization for the MassTransit Kafka rider | netstandard2.1 |
 
 <details>
 <summary><strong>Consuming a Kafka topic instead of the in-memory channel</strong></summary>
@@ -172,11 +170,7 @@ Two delivery modes, and the choice matters:
 - **`ConfigureNotifliwyPipe(context)`** — the MassTransit consumer awaits the sectors directly. Kafka does not advance the offset until every sector has finished, so MassTransit's retry and circuit-breaker middleware still covers your pipeline.
 - **`ConfigureNotifliwyPipe(context, withConnector: true)`** — the message is written into a bounded in-memory channel (10 000 slots) and picked up by `NotificationConnector`. The consumer returns immediately, which decouples consumption from processing and means a crash loses whatever is still buffered.
 
-Kafka messages carrying protobuf need a serializer; that is what the `Synaptix.MassTransit.Kafka.Protobuf` add-on is for:
-
-```csharp
-kafka.SetSerializationFactory(new ProtobufKafkaSerializerFactory());
-```
+Serialization is MassTransit's default for the rider (JSON unless you plug your own factory). Bring any serializer the MassTransit Kafka rider supports — it is not part of Notifliwy.
 
 </details>
 

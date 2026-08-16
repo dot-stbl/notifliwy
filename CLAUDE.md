@@ -175,7 +175,7 @@ INotificationExporter<TN>: ThrowAsync(TN notif, CT ct) -> ValueTask
 
 - **Fluent API**: All configuration uses builder pattern with method chaining
 - **Async Throughout**: All interfaces use `ValueTask` or `Task` for async operations
-- **Multi-Targeting**: Core library targets .NET 6.0, 7.0 and 8.0 (netstandard2.1 is the `Synaptix.MassTransit.Kafka.Protobuf` add-on only)
+- **Multi-Targeting**: Core library targets .NET 6.0, 7.0 and 8.0
 - **DI-based**: All pipeline components must be registered in DI
 - **Parallel Processing**: Sectors process events in parallel; pipelines within a sector run sequentially and chain into each other (#9)
 - **Cancellation Support**: All async methods accept `CancellationToken`

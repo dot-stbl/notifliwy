@@ -9,7 +9,6 @@ using Notifliwy.Sample.Kafka.Server;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using Synaptix.MassTransit.Kafka.Protobuf;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,8 +44,6 @@ builder.Services.AddMassTransit(configurator =>
 
         registrationConfigurator.UsingKafka((context, factoryConfigurator) =>
         {
-            factoryConfigurator.SetSerializationFactory(new ProtobufKafkaSerializerFactory());
-
             factoryConfigurator.Host("localhost:9092");
 
             var id = Random.Shared.Next(0, 999);

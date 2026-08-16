@@ -7,7 +7,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="protobuf-net" Version="3.2.46"/>
         <PackageReference Include="MassTransit.Kafka" Version="8.5.9" />
     </ItemGroup>
 

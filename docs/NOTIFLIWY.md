@@ -190,7 +190,6 @@ public sealed class ConsoleExporter : INotificationExporter<Notification>
 | Package | Version | Description |
 |---------|---------|-------------|
 | `Notifliwy.Provider.MassTransit.Kafka` | 3.1.0 | Kafka consumer via MassTransit |
-| `Synaptix.MassTransit.Kafka.Protobuf` | 2.1.0 | Protobuf serializer/deserializer |
 | `Notifliwy.OpenTelemetry.Instrumentation` | 3.0.0 | OpenTelemetry tracing/metrics |
 
 ---
